@@ -6,341 +6,366 @@
     <title>Balling.com</title>
     <style>
         :root {
-            --main-cyan: #00e5ff;
-            --bg-white: #ffffff;
-            --text-dark: #333;
-            --error-red: #ff4d4d;
-            --warn-yellow: #ffcc00;
-            --success-green: #4caf50;
+            --cyan: #00e5ff;
+            --white: #ffffff;
+            --gray: #f0f2f5;
         }
 
-        body, html {
-            margin: 0; padding: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f0f2f5;
-            height: 100vh;
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: var(--gray);
             overflow: hidden;
+            height: 100vh;
         }
 
-        .hidden { display: none !important; }
-        
-        /* Nav */
+        /* --- NAVIGATION --- */
         nav {
-            background: var(--bg-white);
-            padding: 15px 25px;
+            background: var(--white);
+            height: 70px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
         }
 
-        #brand-label {
-            position: absolute; left: 50%; transform: translateX(-50%);
-            color: var(--main-cyan); font-weight: bold; font-size: 24px;
+        #brand {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--cyan);
+            font-size: 28px;
+            font-weight: bold;
         }
 
-        button { cursor: pointer; border: none; border-radius: 5px; padding: 8px 15px; font-weight: 600; transition: 0.2s; }
-        .btn-cyan { background: var(--main-cyan); color: white; }
-        .btn-cyan:hover { opacity: 0.8; }
+        .nav-left { display: flex; gap: 10px; }
 
-        /* Notification */
-        #toast {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            padding: 10px 20px; border-radius: 5px; color: white; z-index: 3000;
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            font-weight: bold;
+            transition: 0.2s;
         }
 
-        /* Layout */
-        .container { height: calc(100vh - 70px); padding: 20px; box-sizing: border-box; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 400px; margin: 40px auto; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .btn-cyan { background: var(--cyan); color: white; }
+        .leave-btn { background: #ff4d4d; color: white; margin-top: 10px; width: 100%; }
 
-        /* App Grid */
-        .app-grid { display: grid; grid-template-columns: 280px 1fr; gap: 20px; height: 75%; }
-        .sidebar { background: white; border-radius: 10px; padding: 15px; overflow-y: auto; border: 1px solid #eee; }
-        .main-content { background: white; border-radius: 10px; padding: 20px; position: relative; display: flex; flex-direction: column; }
+        /* --- NOTIFICATIONS --- */
+        #notif {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            z-index: 9999;
+            display: none;
+        }
 
-        /* Chat Area */
-        #global-chat-box { flex-grow: 1; overflow-y: auto; background: #f9f9f9; padding: 10px; border-radius: 5px; margin-bottom: 10px; border: 1px solid #eee; }
-        .chat-msg { margin-bottom: 8px; padding: 5px; border-radius: 4px; background: white; border-left: 3px solid var(--main-cyan); }
+        /* --- SCREENS --- */
+        .screen {
+            display: none;
+            padding: 20px;
+            height: calc(100vh - 70px);
+            box-sizing: border-box;
+        }
 
-        .contact-item { width: 100%; text-align: left; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 5px; cursor: pointer; }
-        .contact-item:hover { background: #f0faff; }
+        .active { display: block; }
+        .flex-active { display: flex; justify-content: center; align-items: center; }
 
-        /* Bottom Menu */
-        .bottom-nav { position: fixed; bottom: 20px; left: 20px; display: flex; gap: 15px; }
-        .nav-icon-btn { background: white; padding: 10px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; width: 80px; }
-        .nav-icon-btn img { width: 25px; height: 25px; display: block; margin: 0 auto 5px; }
+        .frame {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            width: 320px;
+            text-align: center;
+        }
 
-        /* Popups */
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .popup { background: white; padding: 25px; border-radius: 10px; min-width: 320px; position: relative; }
-        .close-btn { position: absolute; top: 10px; right: 10px; cursor: pointer; font-size: 20px; font-weight: bold; }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        /* --- APP CONTENT --- */
+        #welcome-text { text-align: center; font-size: 32px; margin-top: 20px; }
+
+        .app-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            height: 70%;
+            margin-top: 20px;
+        }
+
+        .sidebar { background: white; border-radius: 10px; padding: 20px; overflow-y: auto; position: relative; }
+        .main-space { background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+
+        /* --- CONTACTS --- */
+        .contact-entry {
+            width: 100%;
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            margin-bottom: 10px;
+            padding: 10px;
+            text-align: left;
+            border-radius: 5px;
+        }
+
+        .contact-btn-wide {
+            width: 100%;
+            background: var(--cyan);
+            color: white;
+            text-align: left;
+            padding: 15px;
+            font-size: 18px;
+        }
+
+        /* --- BOTTOM MENU --- */
+        .bottom-menu {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .icon-btn {
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .icon-btn img { width: 35px; height: 35px; display: block; margin: 0 auto; }
+
+        /* --- POPUPS --- */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 5000;
+            display: none; justify-content: center; align-items: center;
+        }
+
     </style>
 </head>
 <body>
 
-    <div id="toast" class="hidden"></div>
+    <div id="notif"></div>
 
     <nav>
-        <div id="nav-auth-btns">
-            <button id="btn-get-started" class="btn-cyan" onclick="showScreen('signup-screen')">Get Started</button>
-            <button id="btn-sign-in" onclick="showScreen('login-screen')">Sign In</button>
+        <div class="nav-left" id="logged-out-nav">
+            <button class="btn-cyan" onclick="showScreen('get-started-screen')">Get Started</button>
+            <button onclick="showScreen('sign-in-screen')">Sign In</button>
         </div>
-        <div id="brand-label">Balling.com</div>
-        <div id="user-display" class="hidden" onclick="logout()">
-            <span id="my-profile-name" style="font-weight: bold; color: var(--main-cyan); cursor: pointer;"></span>
-        </div>
+        <div class="nav-left hidden" id="logged-in-nav">
+            </div>
+        <div id="brand">Balling.com</div>
     </nav>
 
-    <div class="container">
-        
-        <div id="signup-screen" class="card hidden">
-            <h3>Create Account</h3>
+    <div id="get-started-screen" class="screen flex-active">
+        <div class="frame">
+            <h3>Register</h3>
             <input type="text" id="reg-user" placeholder="Username" maxlength="19">
             <input type="password" id="reg-pass" placeholder="Password">
-            <button class="btn-cyan" onclick="generateNumber()">Get Number</button>
-            <p id="generated-num" style="margin: 15px; font-weight: bold; color: var(--main-cyan);"></p>
-            <button class="btn-cyan hidden" id="btn-start" onclick="finalizeSignup()">Start</button>
+            <button class="btn-cyan" onclick="generateNum()">Get Number</button>
+            <p id="display-num" style="font-weight: bold; margin: 15px 0; color: var(--cyan);"></p>
+            <button id="start-btn" class="btn-cyan" style="display:none; width:100%;" onclick="doSignup()">Start</button>
+            <button class="leave-btn" onclick="hideAll()">Leave</button>
         </div>
+    </div>
 
-        <div id="login-screen" class="card hidden">
+    <div id="sign-in-screen" class="screen flex-active">
+        <div class="frame">
             <h3>Sign In</h3>
             <input type="text" id="login-user" placeholder="Username">
             <input type="password" id="login-pass" placeholder="Password">
-            <button class="btn-cyan" onclick="attemptLogin()">Login</button>
+            <button class="btn-cyan" style="width:100%" onclick="doLogin()">Login</button>
+            <button class="leave-btn" onclick="hideAll()">Leave</button>
+        </div>
+    </div>
+
+    <div id="main-app" class="screen">
+        <div id="welcome-text">Hello, Welcome.</div>
+        <div class="app-layout">
+            <div class="sidebar">
+                <h4 style="margin-top:0">Contact</h4>
+                <div id="contact-container">
+                    </div>
+            </div>
+            <div class="main-space">
+                <input type="text" readonly value="Where you can find your number, to another number." style="width: 80%; text-align: center; border: 2px dashed var(--cyan); background: #f0faff;">
+            </div>
         </div>
 
-        <div id="app-screen" class="hidden">
-            <h2 style="text-align: center; color: var(--text-dark);">Hello, Welcome.</h2>
-            
-            <div class="app-grid">
-                <div class="sidebar">
-                    <h4 style="border-bottom: 2px solid var(--main-cyan);">Contacts</h4>
-                    <div id="contact-list"></div>
-                    <div id="empty-msg" style="text-align: center; margin-top: 20px; color: #888;">
-                        You Don't Have Any Contacts!
-                    </div>
-                </div>
-
-                <div class="main-content">
-                    <div id="blank-space-info" style="margin-bottom: 20px;">
-                        <input type="text" readonly value="Where you can find your number, to another number." style="background: #f0faff; border: 1px dashed var(--main-cyan); text-align: center;">
-                        <p style="text-align: center;"><strong>Your Number:</strong> <span id="display-my-num" style="color: var(--main-cyan)"></span></p>
-                    </div>
-
-                    <h4 style="margin: 0 0 10px 0;">Global Online Chat</h4>
-                    <div id="global-chat-box"></div>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="global-msg-input" placeholder="Type to talk online...">
-                        <button class="btn-cyan" onclick="sendGlobalMsg()">Send</button>
-                    </div>
-                </div>
+        <div class="bottom-menu">
+            <div class="icon-btn" onclick="renderContacts()">
+                <img src="https://cdn-icons-png.flaticon.com/512/3722/3722900.png">
+                <span>Contacts</span>
             </div>
-
-            <div class="bottom-nav">
-                <div class="nav-icon-btn" onclick="showScreen('app-screen')">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3722/3722900.png" alt="C">
-                    <div style="font-size: 10px;">Contacts</div>
-                </div>
-                <div class="nav-icon-btn" onclick="openAddContact()">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3616/3616215.png" alt="P">
-                    <div style="font-size: 10px;">Phone Number</div>
-                </div>
+            <div class="icon-btn" onclick="openPopup('add-contact-pop')">
+                <img src="https://cdn-icons-png.flaticon.com/512/3616/3616215.png">
+                <span>Phone Number</span>
             </div>
         </div>
     </div>
 
-    <div id="modal-container" class="overlay hidden">
-        <div id="pop-add-contact" class="popup hidden">
-            <span class="close-btn" onclick="closeModals()">×</span>
-            <h3>Add Contact</h3>
-            <input type="text" id="search-num" placeholder="(XXX) XXX-XXXX">
-            <button class="btn-cyan" style="width: 100%;" onclick="addContact()">Save Contact</button>
+    <div class="overlay" id="overlay">
+        <div id="add-contact-pop" class="frame" style="display:none">
+            <h3>Save Number</h3>
+            <input type="text" id="search-phone" placeholder="(123) 456-789">
+            <button class="btn-cyan" onclick="saveContact()">Add</button>
+            <button class="leave-btn" onclick="closePopup()">Leave</button>
         </div>
 
-        <div id="pop-chat" class="popup hidden">
-            <span class="close-btn" onclick="closeModals()">×</span>
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
-                <span id="chat-num" style="color: var(--main-cyan); cursor: pointer;" onclick="openSettings()"></span>
-                <span id="chat-user" style="font-weight: bold;"></span>
+        <div id="text-frame" class="frame" style="display:none; width: 400px;">
+            <div style="display:flex; justify-content: space-between; margin-bottom: 10px;">
+                <span id="text-num" style="color:var(--cyan); cursor:pointer;" onclick="openPopup('options-pop')"></span>
+                <span id="text-user" style="font-weight:bold"></span>
             </div>
-            <div style="height: 150px; overflow-y: auto; padding: 10px; background: #f9f9f9; margin: 10px 0;" id="private-msgs">
-                <small>Private messaging secure...</small>
-            </div>
+            <div style="height:150px; background:#eee; margin-bottom:10px; border-radius:5px;"></div>
             <input type="text" placeholder="Text User">
-            <button class="btn-cyan" style="width: 100%;">Send Message</button>
+            <button class="btn-cyan">Send</button>
+            <button class="leave-btn" onclick="closePopup()">Leave</button>
         </div>
 
-        <div id="pop-settings" class="popup hidden">
-            <span class="close-btn" onclick="closeModals()">×</span>
-            <h3>Contact Options</h3>
-            <button style="background: #eee; width: 100%; margin: 5px 0;" onclick="changeContactName()">Change Username</button>
-            <button style="background: var(--error-red); color: white; width: 100%; margin: 5px 0;" onclick="closeModals()">Block</button>
+        <div id="options-pop" class="frame" style="display:none">
+            <h3>Options</h3>
+            <button style="width:100%; margin-bottom:10px;">Change Username</button>
+            <button style="width:100%; background: #333; color:white;">Block</button>
+            <button class="leave-btn" onclick="closePopup()">Leave</button>
         </div>
     </div>
 
     <script>
-        let users = JSON.parse(localStorage.getItem('balling_users')) || [];
-        let globalMessages = JSON.parse(localStorage.getItem('balling_chat')) || [];
+        let db = JSON.parse(localStorage.getItem('balling_data')) || [];
         let currentUser = null;
-        let tempNumber = "";
+        let tempNum = "";
 
-        function showScreen(screenId) {
-            ['signup-screen', 'login-screen', 'app-screen'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-            document.getElementById(screenId).classList.remove('hidden');
+        // UI HELPERS
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active', 'flex-active'));
+            const target = document.getElementById(id);
+            target.classList.add(id.includes('screen') ? 'flex-active' : 'active');
         }
 
-        function notify(msg, color) {
-            const t = document.getElementById('toast');
-            t.textContent = msg; t.style.backgroundColor = color;
-            t.classList.remove('hidden');
-            setTimeout(() => t.classList.add('hidden'), 3000);
+        function hideAll() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active', 'flex-active'));
         }
 
-        function generateNumber() {
-            const area = Math.floor(100 + Math.random() * 899);
-            const mid = Math.floor(100 + Math.random() * 899);
-            const last = Math.floor(1000 + Math.random() * 8999);
-            tempNumber = `(${area}) ${mid}-${last}`;
-            if(users.find(u => u.phone === tempNumber)) return generateNumber();
-            document.getElementById('generated-num').innerText = tempNumber;
-            document.getElementById('btn-start').classList.remove('hidden');
+        function notify(text, color) {
+            const el = document.getElementById('notif');
+            el.innerText = text;
+            el.style.backgroundColor = color;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 3000);
         }
 
-        function finalizeSignup() {
-            const user = document.getElementById('reg-user').value;
-            const pass = document.getElementById('reg-pass').value;
-            if(!user || user.length >= 20) { alert("Invalid Username"); return; }
-            const newUser = { username: user, password: pass, phone: tempNumber, contacts: [] };
-            users.push(newUser);
-            saveData();
-            loginUser(newUser);
+        // SIGNUP
+        function generateNum() {
+            const r = (m) => Math.floor(Math.random() * m);
+            tempNum = `(${r(900)+100}) ${r(900)+100}-${r(9000)+1000}`;
+            document.getElementById('display-num').innerText = tempNum;
+            document.getElementById('start-btn').style.display = 'block';
         }
 
-        function attemptLogin() {
-            const user = document.getElementById('login-user').value;
-            const pass = document.getElementById('login-pass').value;
-            const found = users.find(u => u.username === user && u.password === pass);
-            if(found) loginUser(found); else notify("Invalid Credentials", "red");
+        function doSignup() {
+            const u = document.getElementById('reg-user').value;
+            const p = document.getElementById('reg-pass').value;
+            if(!u || u.length >= 20) return alert("Username error");
+            
+            const newUser = { username: u, password: p, phone: tempNum, contacts: [] };
+            db.push(newUser);
+            save();
+            loginSuccess(newUser);
         }
 
-        function loginUser(user) {
+        // LOGIN
+        function doLogin() {
+            const u = document.getElementById('login-user').value;
+            const p = document.getElementById('login-pass').value;
+            const user = db.find(x => x.username === u && x.password === p);
+            if(user) loginSuccess(user); else alert("Wrong info");
+        }
+
+        function loginSuccess(user) {
             currentUser = user;
-            showScreen('app-screen');
-            document.getElementById('nav-auth-btns').classList.add('hidden');
-            document.getElementById('user-display').classList.remove('hidden');
-            document.getElementById('my-profile-name').innerText = user.username + " (Sign Out)";
-            document.getElementById('display-my-num').innerText = user.phone;
+            showScreen('main-app');
+            document.getElementById('logged-out-nav').style.display = 'none';
+            const navIn = document.getElementById('logged-in-nav');
+            navIn.innerHTML = `<button class="btn-cyan" onclick="location.reload()">${user.phone} (Sign Out)</button>`;
+            navIn.classList.remove('hidden');
             renderContacts();
-            renderGlobalChat();
         }
 
-        function logout() { location.reload(); }
-
-        function openAddContact() {
-            document.getElementById('modal-container').classList.remove('hidden');
-            document.getElementById('pop-add-contact').classList.remove('hidden');
-        }
-
-        function closeModals() {
-            document.getElementById('modal-container').classList.add('hidden');
-            document.querySelectorAll('.popup').forEach(p => p.classList.add('hidden'));
-        }
-
-        function addContact() {
-            const num = document.getElementById('search-num').value;
-            if(num === currentUser.phone) {
-                notify("Don't Put Your Number In Silly!", "var(--warn-yellow)"); return;
+        // CONTACTS
+        function saveContact() {
+            const val = document.getElementById('search-phone').value;
+            if(val === currentUser.phone) {
+                notify("Don't Put Your Number In Silly!", "#ffcc00");
+                return;
             }
-            const target = users.find(u => u.phone === num);
-            if(target) {
-                if(!currentUser.contacts.find(c => c.phone === num)) {
-                    currentUser.contacts.push({ phone: target.phone, name: target.username });
-                    saveData();
-                    notify("Contact Saved!", "var(--success-green)");
-                    renderContacts();
-                    closeModals();
-                }
+            const found = db.find(u => u.phone === val);
+            if(found) {
+                currentUser.contacts.push({ phone: found.phone, name: found.username });
+                save();
+                notify("Contact Saved!", "#4caf50");
+                closePopup();
+                renderContacts();
             } else {
-                notify("Not A Real Number", "var(--error-red)");
+                notify("Not A Real Number", "#ff4d4d");
             }
         }
 
         function renderContacts() {
-            const list = document.getElementById('contact-list');
-            list.innerHTML = "";
-            document.getElementById('empty-msg').className = currentUser.contacts.length ? "hidden" : "";
-            
-            currentUser.contacts.forEach(c => {
-                const div = document.createElement('div');
-                div.className = "contact-item";
-                div.innerHTML = `<strong>${c.phone}</strong><br><small>${c.name}</small>
-                                 <div style="margin-top:5px">
-                                    <button class="btn-cyan" onclick="openChat('${c.phone}', '${c.name}')">Text</button>
-                                    <button onclick="alert('Calling...')">Call</button>
-                                 </div>`;
-                list.appendChild(div);
-            });
-        }
-
-        function sendGlobalMsg() {
-            const input = document.getElementById('global-msg-input');
-            if(!input.value) return;
-            const msg = { user: currentUser.username, text: input.value };
-            globalMessages.push(msg);
-            localStorage.setItem('balling_chat', JSON.stringify(globalMessages));
-            input.value = "";
-            renderGlobalChat();
-        }
-
-        function renderGlobalChat() {
-            const box = document.getElementById('global-chat-box');
-            box.innerHTML = globalMessages.map(m => `
-                <div class="chat-msg"><strong>${m.user}:</strong> ${m.text}</div>
-            `).join('');
-            box.scrollTop = box.scrollHeight;
-        }
-
-        function openChat(phone, name) {
-            document.getElementById('modal-container').classList.remove('hidden');
-            document.getElementById('pop-chat').classList.remove('hidden');
-            document.getElementById('chat-num').innerText = phone;
-            document.getElementById('chat-user').innerText = name;
-        }
-
-        function openSettings() {
-            document.getElementById('pop-chat').classList.add('hidden');
-            document.getElementById('pop-settings').classList.remove('hidden');
-        }
-
-        function changeContactName() {
-            const newName = prompt("Enter new name for this contact:");
-            if(newName) {
-                const phone = document.getElementById('chat-num').innerText;
-                const contact = currentUser.contacts.find(c => c.phone === phone);
-                if(contact) contact.name = newName;
-                saveData();
-                renderContacts();
-                closeModals();
+            const container = document.getElementById('contact-container');
+            container.innerHTML = "";
+            if(currentUser.contacts.length === 0) {
+                container.innerHTML = `<div style="text-align:center; margin-top:50px;">You Don't Have Any Contacts!</div>`;
+            } else {
+                currentUser.contacts.forEach(c => {
+                    const div = document.createElement('div');
+                    div.className = "contact-entry";
+                    div.innerHTML = `
+                        <button class="contact-btn-wide" onclick="openText('${c.phone}', '${c.name}')">${c.phone}</button>
+                        <div style="font-size:12px; color:#666; margin-left:10px;">${c.name}</div>
+                    `;
+                    container.appendChild(div);
+                });
             }
         }
 
-        function saveData() {
-            const idx = users.findIndex(u => u.username === currentUser.username);
-            if(idx !== -1) users[idx] = currentUser;
-            localStorage.setItem('balling_users', JSON.stringify(users));
+        function openText(num, user) {
+            document.getElementById('text-num').innerText = num;
+            document.getElementById('text-user').innerText = user;
+            openPopup('text-frame');
         }
 
-        // Live refresh chat every 3 seconds
-        setInterval(() => {
-            if(currentUser) {
-                globalMessages = JSON.parse(localStorage.getItem('balling_chat')) || [];
-                renderGlobalChat();
-            }
-        }, 3000);
+        // POPUP HELPERS
+        function openPopup(id) {
+            document.getElementById('overlay').style.display = 'flex';
+            document.getElementById(id).style.display = 'block';
+        }
 
+        function closePopup() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('add-contact-pop').style.display = 'none';
+            document.getElementById('text-frame').style.display = 'none';
+            document.getElementById('options-pop').style.display = 'none';
+        }
+
+        function save() {
+            localStorage.setItem('balling_data', JSON.stringify(db));
+        }
     </script>
 </body>
 </html>
