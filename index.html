@@ -5,326 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Balling.com</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #ffffff 0%, #e0f7ff 100%);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .landing {
-            text-align: center;
-            padding-top: 100px;
-        }
-
-        .logo {
-            font-size: 48px;
-            color: #00bcd4;
-            font-weight: bold;
-            margin-bottom: 50px;
-        }
-
-        .btn {
-            padding: 15px 40px;
-            margin: 10px;
-            border: none;
-            border-radius: 25px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-        }
-
-        .btn-primary {
-            background: #00bcd4;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0097a7;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: white;
-            color: #00bcd4;
-            border: 2px solid #00bcd4;
-        }
-
-        .btn-secondary:hover {
-            background: #00bcd4;
-            color: white;
-        }
-
-        .auth-frame {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,188,212,0.2);
-            max-width: 400px;
-            margin: 50px auto;
-        }
-
-        .auth-frame h2 {
-            color: #00bcd4;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border 0.3s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #00bcd4;
-        }
-
-        .generated-number {
-            background: #e0f7ff;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-            text-align: center;
-            font-size: 20px;
-            color: #00bcd4;
-            font-weight: bold;
-        }
-
-        .app-header {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        .welcome-text {
-            color: #00bcd4;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .app-content {
-            display: flex;
-            gap: 20px;
-            min-height: 500px;
-        }
-
-        .sidebar {
-            width: 250px;
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .user-info {
-            background: #e0f7ff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .user-info:hover {
-            background: #b3e5fc;
-        }
-
-        .nav-btn {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            background: white;
-            border: 2px solid #00bcd4;
-            border-radius: 8px;
-            color: #00bcd4;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .nav-btn:hover {
-            background: #00bcd4;
-            color: white;
-        }
-
-        .nav-btn.active {
-            background: #00bcd4;
-            color: white;
-        }
-
-        .main-content {
-            flex: 1;
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .empty-state {
-            text-align: center;
-            color: #999;
-            padding: 100px 20px;
-            font-size: 18px;
-        }
-
-        .contact-item {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            background: #f5f5f5;
-            border: none;
-            border-radius: 8px;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .contact-item:hover {
-            background: #e0f7ff;
-            transform: translateX(5px);
-        }
-
-        .contact-number {
-            font-size: 16px;
-            font-weight: bold;
-            color: #00bcd4;
-        }
-
-        .contact-username {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 15px 30px;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
-            z-index: 1000;
-            animation: slideDown 0.3s;
-        }
-
-        @keyframes slideDown {
-            from { top: -50px; opacity: 0; }
-            to { top: 20px; opacity: 1; }
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #ffffff 0%, #e0f7ff 100%); min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .landing { text-align: center; padding-top: 100px; }
+        .logo { font-size: 48px; color: #00bcd4; font-weight: bold; margin-bottom: 50px; }
+        .btn { padding: 15px 40px; margin: 10px; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: all 0.3s; font-weight: 600; }
+        .btn-primary { background: #00bcd4; color: white; }
+        .btn-primary:hover { background: #0097a7; transform: translateY(-2px); }
+        .btn-secondary { background: white; color: #00bcd4; border: 2px solid #00bcd4; }
+        .auth-frame { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,188,212,0.2); max-width: 400px; margin: 50px auto; }
+        .auth-frame h2 { color: #00bcd4; margin-bottom: 30px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; }
+        .generated-number { background: #e0f7ff; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; font-size: 24px; color: #00bcd4; font-weight: bold; letter-spacing: 2px; }
+        .app-header { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+        .welcome-text { color: #00bcd4; font-size: 28px; font-weight: bold; }
+        .app-content { display: flex; gap: 20px; min-height: 500px; }
+        .sidebar { width: 250px; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .user-info { background: #e0f7ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; cursor: pointer; }
+        .nav-btn { width: 100%; padding: 15px; margin: 10px 0; background: white; border: 2px solid #00bcd4; border-radius: 8px; color: #00bcd4; cursor: pointer; font-weight: 600; text-align: center; }
+        .nav-btn.active { background: #00bcd4; color: white; }
+        .main-content { flex: 1; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .empty-state { text-align: center; color: #999; padding: 100px 20px; font-size: 18px; }
+        .contact-item { width: 100%; padding: 15px; margin: 10px 0; background: #f5f5f5; border: none; border-radius: 8px; text-align: left; cursor: pointer; }
+        .contact-number { font-size: 16px; font-weight: bold; color: #00bcd4; }
+        .notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 15px 30px; border-radius: 8px; color: white; z-index: 1000; font-weight: bold; }
         .notification.success { background: #4caf50; }
-        .notification.warning { background: #ffc107; color: #333; }
         .notification.error { background: #f44336; }
-
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 999;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .close-btn {
-            background: #f44336;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .message-container {
-            max-height: 400px;
-            overflow-y: auto;
-            margin: 20px 0;
-            padding: 15px;
-            background: #f5f5f5;
-            border-radius: 8px;
-        }
-
-        .message {
-            margin: 10px 0;
-            padding: 10px 15px;
-            border-radius: 8px;
-            max-width: 70%;
-            word-wrap: break-word;
-        }
-
-        .message.sent {
-            background: #00bcd4;
-            color: white;
-            margin-left: auto;
-        }
-
-        .message.received {
-            background: white;
-            color: #333;
-        }
-
-        .text-input-container {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .text-input {
-            flex: 1;
-        }
-
-        .hidden {
-            display: none !important;
-        }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 999; }
+        .modal-content { background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%; position: relative; }
+        .message-container { max-height: 300px; overflow-y: auto; margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 8px; display: flex; flex-direction: column; }
+        .message { margin: 5px 0; padding: 10px; border-radius: 8px; max-width: 80%; word-wrap: break-word; }
+        .message.sent { background: #00bcd4; color: white; align-self: flex-end; }
+        .message.received { background: #ddd; color: #333; align-self: flex-start; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -340,7 +54,7 @@
         <div id="authFrame" class="hidden">
             <div class="auth-frame">
                 <h2 id="authTitle">Get Started</h2>
-                <input type="text" id="username" placeholder="Username" maxlength="20">
+                <input type="text" id="username" placeholder="Username">
                 <input type="password" id="password" placeholder="Password">
                 <div id="numberDisplay" class="hidden">
                     <div class="generated-number" id="phoneNumber"></div>
@@ -359,66 +73,49 @@
                     <div class="user-info" onclick="signOut()">
                         <div class="contact-number" id="userNumber"></div>
                         <div class="contact-username" id="userUsername"></div>
-                        <div style="font-size: 10px; color: #999; margin-top: 5px;">Click to sign out</div>
+                        <div style="font-size: 10px; color: #999;">Sign Out</div>
                     </div>
-                    <button class="nav-btn active" id="navContacts" onclick="showView('contacts', event)">
-                        Contacts
-                    </button>
-                    <button class="nav-btn" id="navAdd" onclick="showView('addContact', event)">
-                        Add Number
-                    </button>
-                    <button class="nav-btn" onclick="showDonateModal()">
-                        Donate
-                    </button>
+                    <button class="nav-btn active" id="btnContacts" onclick="showView('contacts')">Contacts</button>
+                    <button class="nav-btn" id="btnAdd" onclick="showView('addContact')">Add Contact</button>
                 </div>
-                <div class="main-content" id="mainContent">
-                    <div class="empty-state">You Don't Have Any Contacts!</div>
-                </div>
+                <div class="main-content" id="mainContent"></div>
             </div>
         </div>
     </div>
 
     <script>
-        const appData = {
-            users: {},
-            currentUser: null,
-            authMode: 'signup',
-            messages: {}
+        // CORE DATA
+        let appData = {
+            users: JSON.parse(localStorage.getItem('balling_users')) || {},
+            messages: JSON.parse(localStorage.getItem('balling_messages')) || {},
+            currentUser: null
         };
-
-        // --- DATA PERSISTENCE ---
-        function loadData() {
-            const savedUsers = localStorage.getItem('balling_users');
-            const savedMsgs = localStorage.getItem('balling_messages');
-            if (savedUsers) appData.users = JSON.parse(savedUsers);
-            if (savedMsgs) appData.messages = JSON.parse(savedMsgs);
-        }
 
         function saveData() {
             localStorage.setItem('balling_users', JSON.stringify(appData.users));
             localStorage.setItem('balling_messages', JSON.stringify(appData.messages));
         }
 
-        // --- LOGIC ---
-        function generateNumericOnly() {
-            // Generates a simple 10-digit numeric string
-            let num = "";
-            for(let i=0; i<10; i++) num += Math.floor(Math.random()*10);
-            return num;
+        function generateDigitsOnly() {
+            return Math.floor(Math.random() * 9000000000 + 1000000000).toString();
         }
 
+        // AUTH SYSTEM
         function showAuth(mode) {
-            appData.authMode = mode;
             document.getElementById('landingPage').classList.add('hidden');
             document.getElementById('authFrame').classList.remove('hidden');
-            
             const authBtn = document.getElementById('authButton');
-            document.getElementById('numberDisplay').classList.add('hidden');
             
             if (mode === 'signup') {
                 document.getElementById('authTitle').textContent = 'Get Started';
                 authBtn.textContent = 'Get Number';
-                authBtn.onclick = getNumber;
+                authBtn.onclick = () => {
+                    const num = generateDigitsOnly();
+                    document.getElementById('phoneNumber').textContent = num;
+                    document.getElementById('numberDisplay').classList.remove('hidden');
+                    authBtn.textContent = 'Register';
+                    authBtn.onclick = () => completeSignup(num);
+                };
             } else {
                 document.getElementById('authTitle').textContent = 'Sign In';
                 authBtn.textContent = 'Sign In';
@@ -426,28 +123,13 @@
             }
         }
 
-        function getNumber() {
+        function completeSignup(num) {
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
-            if (!user || !pass) return showNotification('Fill all fields', 'error');
-
-            const phoneNumber = generateNumericOnly();
-            document.getElementById('phoneNumber').textContent = phoneNumber;
-            document.getElementById('numberDisplay').classList.remove('hidden');
+            if(!user || !pass) return showNotification('Fill all fields', 'error');
             
-            const authBtn = document.getElementById('authButton');
-            authBtn.textContent = 'Start';
-            authBtn.onclick = () => completeSignup(user, pass, phoneNumber);
-        }
-
-        function completeSignup(user, pass, phone) {
-            appData.users[phone] = {
-                username: user,
-                password: pass,
-                contacts: {},
-                customNames: {}
-            };
-            appData.currentUser = phone;
+            appData.users[num] = { username: user, password: pass, contacts: [] };
+            appData.currentUser = num;
             saveData();
             showMainApp();
         }
@@ -455,17 +137,17 @@
         function signIn() {
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
-            
-            for (let phone in appData.users) {
-                if (appData.users[phone].username === user && appData.users[phone].password === pass) {
-                    appData.currentUser = phone;
+            for (let num in appData.users) {
+                if (appData.users[num].username === user && appData.users[num].password === pass) {
+                    appData.currentUser = num;
                     showMainApp();
                     return;
                 }
             }
-            showNotification('Invalid credentials', 'error');
+            showNotification('User not found', 'error');
         }
 
+        // APP LOGIC
         function showMainApp() {
             document.getElementById('authFrame').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
@@ -474,146 +156,86 @@
             showView('contacts');
         }
 
-        function signOut() {
-            appData.currentUser = null;
-            document.getElementById('mainApp').classList.add('hidden');
-            document.getElementById('landingPage').classList.remove('hidden');
-        }
-
-        function backToLanding() {
-            document.getElementById('authFrame').classList.add('hidden');
-            document.getElementById('landingPage').classList.remove('hidden');
-        }
-
-        function showView(view, event) {
-            if (event) {
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                event.target.classList.add('active');
-            }
-            if (view === 'contacts') renderContacts();
-            if (view === 'addContact') renderAddContact();
-        }
-
-        function renderContacts() {
+        function showView(view) {
             const content = document.getElementById('mainContent');
-            const contacts = appData.users[appData.currentUser].contacts;
-            
-            if (Object.keys(contacts).length === 0) {
-                content.innerHTML = '<div class="empty-state">You Don\'t Have Any Contacts!</div>';
-            } else {
-                content.innerHTML = '';
-                for (let phone in contacts) {
-                    const name = appData.users[appData.currentUser].customNames[phone] || (appData.users[phone] ? appData.users[phone].username : "Unknown");
-                    const btn = document.createElement('button');
-                    btn.className = 'contact-item';
-                    btn.innerHTML = `<div class="contact-number">${phone}</div><div class="contact-username">${name}</div>`;
-                    btn.onclick = () => openContactOptions(phone);
-                    content.appendChild(btn);
+            document.getElementById('btnContacts').classList.toggle('active', view === 'contacts');
+            document.getElementById('btnAdd').classList.toggle('active', view === 'addContact');
+
+            if(view === 'contacts') {
+                const list = appData.users[appData.currentUser].contacts || [];
+                if(list.length === 0) {
+                    content.innerHTML = '<div class="empty-state">No Contacts Yet</div>';
+                } else {
+                    content.innerHTML = list.map(num => `
+                        <button class="contact-item" onclick="openChat('${num}')">
+                            <div class="contact-number">${num}</div>
+                            <div class="contact-username">${appData.users[num]?.username || 'User'}</div>
+                        </button>
+                    `).join('');
                 }
+            } else {
+                content.innerHTML = `
+                    <h3>Add Contact</h3>
+                    <input type="text" id="targetNum" placeholder="Enter Number (Digits Only)">
+                    <button class="btn btn-primary" onclick="addContact()">Add</button>
+                `;
             }
         }
 
-        function renderAddContact() {
-            document.getElementById('mainContent').innerHTML = `
-                <h2 style="color: #00bcd4; margin-bottom: 20px;">Add Contact</h2>
-                <input type="text" id="contactNumber" placeholder="Enter numeric phone number">
-                <button class="btn btn-primary" onclick="addContactAction()">Add Contact</button>
-            `;
-        }
-
-        function addContactAction() {
-            const phone = document.getElementById('contactNumber').value.trim();
-            if (phone === appData.currentUser) return showNotification('Don\'t add yourself!', 'warning');
-            if (!appData.users[phone]) return showNotification('Not a real number', 'error');
+        function addContact() {
+            const num = document.getElementById('targetNum').value.trim();
+            if(!appData.users[num]) return showNotification('Number does not exist', 'error');
+            if(num === appData.currentUser) return showNotification('Cannot add yourself', 'error');
             
-            appData.users[appData.currentUser].contacts[phone] = true;
-            saveData();
-            showNotification('Saved!', 'success');
-            showView('contacts');
-            document.getElementById('navContacts').classList.add('active');
-            document.getElementById('navAdd').classList.remove('active');
+            if(!appData.users[appData.currentUser].contacts.includes(num)) {
+                appData.users[appData.currentUser].contacts.push(num);
+                saveData();
+                showNotification('Added!', 'success');
+                showView('contacts');
+            } else {
+                showNotification('Already added', 'error');
+            }
         }
 
-        function openContactOptions(phone) {
-            const name = appData.users[appData.currentUser].customNames[phone] || appData.users[phone].username;
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <div><b>${phone}</b><br><small>${name}</small></div>
-                        <button class="close-btn" onclick="this.closest('.modal').remove()">X</button>
-                    </div>
-                    <button class="btn btn-primary" style="width:100%" onclick="openChat('${phone}')">Text</button>
-                    <button class="btn btn-secondary" style="width:100%" onclick="deleteContact('${phone}')">Delete Contact</button>
-                </div>`;
-            document.body.appendChild(modal);
-        }
-
+        // MESSAGING
         function openChat(phone) {
-            document.querySelectorAll('.modal').forEach(m => m.remove());
             const modal = document.createElement('div');
             modal.className = 'modal';
+            modal.id = 'chatModal';
             modal.innerHTML = `
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <span>Chatting with ${phone}</span>
-                        <button class="close-btn" onclick="this.closest('.modal').remove()">X</button>
-                    </div>
+                    <h3>Chatting with ${phone}</h3>
                     <div class="message-container" id="msgBox"></div>
-                    <div class="text-input-container">
-                        <input type="text" id="chatInput" placeholder="Message...">
-                        <button class="btn btn-primary" onclick="sendMsg('${phone}')">Send</button>
+                    <div style="display:flex; gap:5px">
+                        <input type="text" id="msgInput" placeholder="Message...">
+                        <button class="btn-primary" style="border:none; border-radius:8px; padding:0 15px" onclick="sendMsg('${phone}')">Send</button>
                     </div>
-                </div>`;
+                    <button class="btn-secondary" style="width:100%; margin-top:10px" onclick="document.getElementById('chatModal').remove()">Close</button>
+                </div>
+            `;
             document.body.appendChild(modal);
-            renderMessages(phone);
-        }
-
-        function sendMsg(phone) {
-            const val = document.getElementById('chatInput').value.trim();
-            if (!val) return;
-            const key = [appData.currentUser, phone].sort().join('_');
-            if (!appData.messages[key]) appData.messages[key] = [];
-            appData.messages[key].push({ from: appData.currentUser, text: val });
-            saveData();
-            document.getElementById('chatInput').value = '';
             renderMessages(phone);
         }
 
         function renderMessages(phone) {
             const box = document.getElementById('msgBox');
-            const key = [appData.currentUser, phone].sort().join('_');
-            const msgs = appData.messages[key] || [];
-            box.innerHTML = msgs.length ? '' : '<center>No messages</center>';
-            msgs.forEach(m => {
-                const div = document.createElement('div');
-                div.className = 'message ' + (m.from === appData.currentUser ? 'sent' : 'received');
-                div.textContent = m.text;
-                box.appendChild(div);
-            });
+            const chatKey = [appData.currentUser, phone].sort().join('_');
+            const msgs = appData.messages[chatKey] || [];
+            box.innerHTML = msgs.map(m => `
+                <div class="message ${m.from === appData.currentUser ? 'sent' : 'received'}">${m.txt}</div>
+            `).join('');
             box.scrollTop = box.scrollHeight;
         }
 
-        function deleteContact(phone) {
-            delete appData.users[appData.currentUser].contacts[phone];
+        function sendMsg(phone) {
+            const txt = document.getElementById('msgInput').value.trim();
+            if(!txt) return;
+            const chatKey = [appData.currentUser, phone].sort().join('_');
+            if(!appData.messages[chatKey]) appData.messages[chatKey] = [];
+            appData.messages[chatKey].push({ from: appData.currentUser, txt: txt });
             saveData();
-            document.querySelectorAll('.modal').forEach(m => m.remove());
-            renderContacts();
-            showNotification('Deleted', 'error');
-        }
-
-        function showDonateModal() {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h3>Donate</h3>
-                    <input type="number" placeholder="Amount" id="donAmt">
-                    <button class="btn btn-primary" onclick="this.closest('.modal').remove(); showNotification('Thanks!', 'success')">Give</button>
-                    <button class="btn" onclick="this.closest('.modal').remove()">Cancel</button>
-                </div>`;
-            document.body.appendChild(modal);
+            document.getElementById('msgInput').value = '';
+            renderMessages(phone);
         }
 
         function showNotification(msg, type) {
@@ -621,10 +243,11 @@
             n.className = 'notification ' + type;
             n.textContent = msg;
             document.body.appendChild(n);
-            setTimeout(() => n.remove(), 2500);
+            setTimeout(() => n.remove(), 2000);
         }
 
-        window.onload = loadData;
+        function backToLanding() { location.reload(); }
+        function signOut() { location.reload(); }
     </script>
 </body>
 </html>
