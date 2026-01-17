@@ -5,157 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Balling.com</title>
     <style>
-        :root {
-            --cyan: #00e5ff;
-            --white: #ffffff;
-            --gray: #f0f2f5;
-        }
+        :root { --cyan: #00e5ff; --white: #ffffff; --gray: #f0f2f5; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: var(--gray); overflow: hidden; height: 100vh; }
+        .hidden { display: none !important; }
 
-        body {
-            margin: 0;
-            font-family: 'Arial', sans-serif;
-            background-color: var(--gray);
-            overflow: hidden;
-            height: 100vh;
-        }
-
-        /* --- NAVIGATION --- */
-        nav {
-            background: var(--white);
-            height: 70px;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: relative;
-        }
-
-        #brand {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            color: var(--cyan);
-            font-size: 28px;
-            font-weight: bold;
-        }
-
+        /* Navigation */
+        nav { background: var(--white); height: 70px; display: flex; align-items: center; padding: 0 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: relative; }
+        #brand { position: absolute; left: 50%; transform: translateX(-50%); color: var(--cyan); font-size: 28px; font-weight: bold; }
         .nav-left { display: flex; gap: 10px; }
 
-        button {
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            padding: 10px 15px;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-
+        /* UI Elements */
+        button { cursor: pointer; border: none; border-radius: 5px; padding: 10px 15px; font-weight: bold; transition: 0.2s; }
         .btn-cyan { background: var(--cyan); color: white; }
-        .leave-btn { background: #ff4d4d; color: white; margin-top: 10px; width: 100%; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        
+        #notif { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 15px 30px; border-radius: 8px; color: white; font-weight: bold; z-index: 9999; display: none; }
 
-        /* --- NOTIFICATIONS --- */
-        #notif {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 15px 30px;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
-            z-index: 9999;
-            display: none;
-        }
-
-        /* --- SCREENS --- */
-        .screen {
-            display: none;
-            padding: 20px;
-            height: calc(100vh - 70px);
-            box-sizing: border-box;
-        }
-
+        /* Screens */
+        .screen { display: none; padding: 20px; height: calc(100vh - 70px); box-sizing: border-box; }
         .active { display: block; }
-        .flex-active { display: flex; justify-content: center; align-items: center; }
+        .flex-active { display: flex; flex-direction: column; justify-content: center; align-items: center; }
 
-        .frame {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            width: 320px;
-            text-align: center;
-        }
+        /* Layout */
+        .frame { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); width: 340px; text-align: center; }
+        .app-layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; height: 75%; margin-top: 20px; }
+        .sidebar { background: white; border-radius: 10px; padding: 20px; overflow-y: auto; }
+        .main-space { background: white; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; }
 
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
+        /* Contacts */
+        .contact-entry { width: 100%; background: #f9f9f9; border: 1px solid #eee; margin-bottom: 10px; padding: 10px; border-radius: 5px; }
+        .contact-btn-wide { width: 100%; background: var(--cyan); color: white; text-align: left; padding: 15px; font-size: 16px; border-radius: 5px; }
 
-        /* --- APP CONTENT --- */
-        #welcome-text { text-align: center; font-size: 32px; margin-top: 20px; }
+        /* Chat */
+        #global-chat-box { flex-grow: 1; background: #f8f9fa; border: 1px solid #ddd; border-radius: 5px; padding: 10px; overflow-y: auto; margin-bottom: 10px; }
+        .msg { margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
 
-        .app-layout {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 20px;
-            height: 70%;
-            margin-top: 20px;
-        }
-
-        .sidebar { background: white; border-radius: 10px; padding: 20px; overflow-y: auto; position: relative; }
-        .main-space { background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-
-        /* --- CONTACTS --- */
-        .contact-entry {
-            width: 100%;
-            background: #f9f9f9;
-            border: 1px solid #eee;
-            margin-bottom: 10px;
-            padding: 10px;
-            text-align: left;
-            border-radius: 5px;
-        }
-
-        .contact-btn-wide {
-            width: 100%;
-            background: var(--cyan);
-            color: white;
-            text-align: left;
-            padding: 15px;
-            font-size: 18px;
-        }
-
-        /* --- BOTTOM MENU --- */
-        .bottom-menu {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            display: flex;
-            gap: 20px;
-        }
-
-        .icon-btn {
-            background: white;
-            padding: 10px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        .icon-btn img { width: 35px; height: 35px; display: block; margin: 0 auto; }
-
-        /* --- POPUPS --- */
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 5000;
-            display: none; justify-content: center; align-items: center;
-        }
-
+        /* Bottom Menu */
+        .bottom-menu { position: fixed; bottom: 20px; left: 20px; display: flex; gap: 15px; }
+        .icon-btn { background: white; padding: 10px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; width: 80px; }
+        .icon-btn img { width: 30px; display: block; margin: 0 auto; }
     </style>
 </head>
 <body>
@@ -163,163 +51,156 @@
     <div id="notif"></div>
 
     <nav>
-        <div class="nav-left" id="logged-out-nav">
-            <button class="btn-cyan" onclick="showScreen('get-started-screen')">Get Started</button>
-            <button onclick="showScreen('sign-in-screen')">Sign In</button>
+        <div class="nav-left" id="auth-nav">
+            <button class="btn-cyan" onclick="openScreen('signup-screen')">Get Started</button>
+            <button onclick="openScreen('login-screen')">Sign In</button>
         </div>
-        <div class="nav-left hidden" id="logged-in-nav">
-            </div>
+        <div class="nav-left hidden" id="user-nav">
+            <button class="btn-cyan" id="my-num-btn" onclick="logout()"></button>
+        </div>
         <div id="brand">Balling.com</div>
     </nav>
 
-    <div id="get-started-screen" class="screen flex-active">
+    <div id="start-screen" class="screen active flex-active">
+        <input type="text" readonly value="Where you can find your number, to another number." style="width: 400px; text-align: center; border: 2px dashed var(--cyan); background: #f0faff; margin-bottom: 20px;">
+        <h1 style="color: var(--cyan);">Welcome to Balling.com</h1>
+        <p>Press "Get Started" to generate your global number.</p>
+    </div>
+
+    <div id="signup-screen" class="screen flex-active">
         <div class="frame">
-            <h3>Register</h3>
+            <h3>Register Account</h3>
             <input type="text" id="reg-user" placeholder="Username" maxlength="19">
             <input type="password" id="reg-pass" placeholder="Password">
-            <button class="btn-cyan" onclick="generateNum()">Get Number</button>
-            <p id="display-num" style="font-weight: bold; margin: 15px 0; color: var(--cyan);"></p>
-            <button id="start-btn" class="btn-cyan" style="display:none; width:100%;" onclick="doSignup()">Start</button>
-            <button class="leave-btn" onclick="hideAll()">Leave</button>
+            <button class="btn-cyan" onclick="generatePhone()">Get Number</button>
+            <p id="reg-num-display" style="font-weight: bold; color: var(--cyan); margin: 10px 0;"></p>
+            <button id="start-app-btn" class="btn-cyan hidden" style="width:100%" onclick="finishSignup()">Start</button>
+            <button onclick="openScreen('start-screen')" style="background:none; color: gray;">Leave</button>
         </div>
     </div>
 
-    <div id="sign-in-screen" class="screen flex-active">
+    <div id="login-screen" class="screen flex-active">
         <div class="frame">
             <h3>Sign In</h3>
-            <input type="text" id="login-user" placeholder="Username">
-            <input type="password" id="login-pass" placeholder="Password">
-            <button class="btn-cyan" style="width:100%" onclick="doLogin()">Login</button>
-            <button class="leave-btn" onclick="hideAll()">Leave</button>
+            <input type="text" id="log-user" placeholder="Username">
+            <input type="password" id="log-pass" placeholder="Password">
+            <button class="btn-cyan" style="width:100%" onclick="login()">Login</button>
+            <button onclick="openScreen('start-screen')" style="background:none; color: gray;">Leave</button>
         </div>
     </div>
 
-    <div id="main-app" class="screen">
-        <div id="welcome-text">Hello, Welcome.</div>
+    <div id="app-screen" class="screen">
+        <h2 style="text-align: center;">Hello, Welcome.</h2>
         <div class="app-layout">
             <div class="sidebar">
-                <h4 style="margin-top:0">Contact</h4>
-                <div id="contact-container">
-                    </div>
+                <h4>Contact</h4>
+                <div id="contacts-list">
+                    <p id="empty-msg" style="text-align: center; color: #999;">You Don't Have Any Contacts!</p>
+                </div>
             </div>
             <div class="main-space">
-                <input type="text" readonly value="Where you can find your number, to another number." style="width: 80%; text-align: center; border: 2px dashed var(--cyan); background: #f0faff;">
+                <h4 style="margin:0 0 10px 0;">Online Community (Cloud Chat)</h4>
+                <div id="global-chat-box"></div>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="chat-msg" placeholder="Talk online with other people...">
+                    <button class="btn-cyan" onclick="sendGlobal()">Send</button>
+                </div>
             </div>
         </div>
 
         <div class="bottom-menu">
-            <div class="icon-btn" onclick="renderContacts()">
+            <div class="icon-btn" onclick="openScreen('app-screen')">
                 <img src="https://cdn-icons-png.flaticon.com/512/3722/3722900.png">
-                <span>Contacts</span>
+                <small>Contacts</small>
             </div>
-            <div class="icon-btn" onclick="openPopup('add-contact-pop')">
+            <div class="icon-btn" onclick="showAddPopup()">
                 <img src="https://cdn-icons-png.flaticon.com/512/3616/3616215.png">
-                <span>Phone Number</span>
+                <small>Phone Number</small>
             </div>
         </div>
     </div>
 
-    <div class="overlay" id="overlay">
-        <div id="add-contact-pop" class="frame" style="display:none">
-            <h3>Save Number</h3>
-            <input type="text" id="search-phone" placeholder="(123) 456-789">
-            <button class="btn-cyan" onclick="saveContact()">Add</button>
-            <button class="leave-btn" onclick="closePopup()">Leave</button>
-        </div>
-
-        <div id="text-frame" class="frame" style="display:none; width: 400px;">
-            <div style="display:flex; justify-content: space-between; margin-bottom: 10px;">
-                <span id="text-num" style="color:var(--cyan); cursor:pointer;" onclick="openPopup('options-pop')"></span>
-                <span id="text-user" style="font-weight:bold"></span>
-            </div>
-            <div style="height:150px; background:#eee; margin-bottom:10px; border-radius:5px;"></div>
-            <input type="text" placeholder="Text User">
-            <button class="btn-cyan">Send</button>
-            <button class="leave-btn" onclick="closePopup()">Leave</button>
-        </div>
-
-        <div id="options-pop" class="frame" style="display:none">
-            <h3>Options</h3>
-            <button style="width:100%; margin-bottom:10px;">Change Username</button>
-            <button style="width:100%; background: #333; color:white;">Block</button>
-            <button class="leave-btn" onclick="closePopup()">Leave</button>
+    <div id="overlay" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9000; display:none; justify-content:center; align-items:center;">
+        <div id="add-pop" class="frame">
+            <h3>Add Contact</h3>
+            <input type="text" id="add-phone" placeholder="(123) 456-789">
+            <button class="btn-cyan" onclick="addContact()">Save Contact</button>
+            <button onclick="closePop()" style="background:none; color:gray;">Leave</button>
         </div>
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('balling_data')) || [];
-        let currentUser = null;
-        let tempNum = "";
+        // DATA SYNC LOGIC (Cloud Simulation)
+        let ballingData = JSON.parse(localStorage.getItem('balling_cloud')) || { users: [], messages: [] };
+        let activeUser = null;
+        let tempPhone = "";
 
-        // UI HELPERS
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active', 'flex-active'));
-            const target = document.getElementById(id);
-            target.classList.add(id.includes('screen') ? 'flex-active' : 'active');
+        function saveCloud() {
+            localStorage.setItem('balling_cloud', JSON.stringify(ballingData));
         }
 
-        function hideAll() {
+        function openScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active', 'flex-active'));
+            const target = document.getElementById(id);
+            if (id === 'app-screen') target.classList.add('active');
+            else target.classList.add('flex-active');
         }
 
         function notify(text, color) {
-            const el = document.getElementById('notif');
-            el.innerText = text;
-            el.style.backgroundColor = color;
-            el.style.display = 'block';
-            setTimeout(() => { el.style.display = 'none'; }, 3000);
+            const n = document.getElementById('notif');
+            n.innerText = text; n.style.backgroundColor = color;
+            n.style.display = 'block';
+            setTimeout(() => n.style.display = 'none', 3000);
         }
 
-        // SIGNUP
-        function generateNum() {
-            const r = (m) => Math.floor(Math.random() * m);
-            tempNum = `(${r(900)+100}) ${r(900)+100}-${r(9000)+1000}`;
-            document.getElementById('display-num').innerText = tempNum;
-            document.getElementById('start-btn').style.display = 'block';
+        function generatePhone() {
+            const r = (n) => Math.floor(Math.random() * n);
+            tempPhone = `(${r(900)+100}) ${r(900)+100}-${r(9000)+1000}`;
+            document.getElementById('reg-num-display').innerText = tempPhone;
+            document.getElementById('start-app-btn').classList.remove('hidden');
         }
 
-        function doSignup() {
+        function finishSignup() {
             const u = document.getElementById('reg-user').value;
             const p = document.getElementById('reg-pass').value;
-            if(!u || u.length >= 20) return alert("Username error");
+            if(!u || u.length >= 20) return alert("Invalid Username");
             
-            const newUser = { username: u, password: p, phone: tempNum, contacts: [] };
-            db.push(newUser);
-            save();
-            loginSuccess(newUser);
+            const user = { username: u, password: p, phone: tempPhone, contacts: [] };
+            ballingData.users.push(user);
+            saveCloud();
+            loadSession(user);
         }
 
-        // LOGIN
-        function doLogin() {
-            const u = document.getElementById('login-user').value;
-            const p = document.getElementById('login-pass').value;
-            const user = db.find(x => x.username === u && x.password === p);
-            if(user) loginSuccess(user); else alert("Wrong info");
+        function login() {
+            const u = document.getElementById('log-user').value;
+            const p = document.getElementById('log-pass').value;
+            const found = ballingData.users.find(x => x.username === u && x.password === p);
+            if(found) loadSession(found);
+            else alert("Account not found!");
         }
 
-        function loginSuccess(user) {
-            currentUser = user;
-            showScreen('main-app');
-            document.getElementById('logged-out-nav').style.display = 'none';
-            const navIn = document.getElementById('logged-in-nav');
-            navIn.innerHTML = `<button class="btn-cyan" onclick="location.reload()">${user.phone} (Sign Out)</button>`;
-            navIn.classList.remove('hidden');
+        function loadSession(user) {
+            activeUser = user;
+            openScreen('app-screen');
+            document.getElementById('auth-nav').classList.add('hidden');
+            document.getElementById('user-nav').classList.remove('hidden');
+            document.getElementById('my-num-btn').innerText = `${user.phone} (Sign Out)`;
             renderContacts();
+            renderChat();
         }
 
-        // CONTACTS
-        function saveContact() {
-            const val = document.getElementById('search-phone').value;
-            if(val === currentUser.phone) {
+        function addContact() {
+            const num = document.getElementById('add-phone').value;
+            if(num === activeUser.phone) {
                 notify("Don't Put Your Number In Silly!", "#ffcc00");
                 return;
             }
-            const found = db.find(u => u.phone === val);
-            if(found) {
-                currentUser.contacts.push({ phone: found.phone, name: found.username });
-                save();
+            const exists = ballingData.users.find(u => u.phone === num);
+            if(exists) {
+                activeUser.contacts.push({ phone: exists.phone, name: exists.username });
+                saveCloud();
                 notify("Contact Saved!", "#4caf50");
-                closePopup();
+                closePop();
                 renderContacts();
             } else {
                 notify("Not A Real Number", "#ff4d4d");
@@ -327,45 +208,46 @@
         }
 
         function renderContacts() {
-            const container = document.getElementById('contact-container');
-            container.innerHTML = "";
-            if(currentUser.contacts.length === 0) {
-                container.innerHTML = `<div style="text-align:center; margin-top:50px;">You Don't Have Any Contacts!</div>`;
-            } else {
-                currentUser.contacts.forEach(c => {
+            const list = document.getElementById('contacts-list');
+            list.innerHTML = "";
+            if(activeUser.contacts.length > 0) {
+                activeUser.contacts.forEach(c => {
                     const div = document.createElement('div');
                     div.className = "contact-entry";
-                    div.innerHTML = `
-                        <button class="contact-btn-wide" onclick="openText('${c.phone}', '${c.name}')">${c.phone}</button>
-                        <div style="font-size:12px; color:#666; margin-left:10px;">${c.name}</div>
-                    `;
-                    container.appendChild(div);
+                    div.innerHTML = `<button class="contact-btn-wide">${c.phone}</button><br><small>${c.name}</small>`;
+                    list.appendChild(div);
                 });
+            } else {
+                list.innerHTML = `<p style="text-align: center; color: #999;">You Don't Have Any Contacts!</p>`;
             }
         }
 
-        function openText(num, user) {
-            document.getElementById('text-num').innerText = num;
-            document.getElementById('text-user').innerText = user;
-            openPopup('text-frame');
+        function sendGlobal() {
+            const input = document.getElementById('chat-msg');
+            if(!input.value) return;
+            ballingData.messages.push({ user: activeUser.username, text: input.value });
+            saveCloud();
+            input.value = "";
+            renderChat();
         }
 
-        // POPUP HELPERS
-        function openPopup(id) {
-            document.getElementById('overlay').style.display = 'flex';
-            document.getElementById(id).style.display = 'block';
+        function renderChat() {
+            const box = document.getElementById('global-chat-box');
+            box.innerHTML = ballingData.messages.map(m => `
+                <div class="msg"><strong>${m.user}:</strong> ${m.text}</div>
+            `).join('');
+            box.scrollTop = box.scrollHeight;
         }
 
-        function closePopup() {
-            document.getElementById('overlay').style.display = 'none';
-            document.getElementById('add-contact-pop').style.display = 'none';
-            document.getElementById('text-frame').style.display = 'none';
-            document.getElementById('options-pop').style.display = 'none';
-        }
+        function showAddPopup() { document.getElementById('overlay').style.display = 'flex'; document.getElementById('add-pop').style.display = 'block'; }
+        function closePop() { document.getElementById('overlay').style.display = 'none'; }
+        function logout() { location.reload(); }
 
-        function save() {
-            localStorage.setItem('balling_data', JSON.stringify(db));
-        }
+        // Multi-device sync simulation (Auto-refresh)
+        setInterval(() => {
+            ballingData = JSON.parse(localStorage.getItem('balling_cloud')) || ballingData;
+            if(activeUser) renderChat();
+        }, 1000);
     </script>
 </body>
 </html>
