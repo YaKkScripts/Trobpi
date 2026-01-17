@@ -15,213 +15,10 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #ffffff 0%, #e0f7ff 100%);
             min-height: 100vh;
+            color: #333;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .landing {
-            text-align: center;
-            padding-top: 100px;
-        }
-
-        .logo {
-            font-size: 48px;
-            color: #00bcd4;
-            font-weight: bold;
-            margin-bottom: 50px;
-        }
-
-        .btn {
-            padding: 15px 40px;
-            margin: 10px;
-            border: none;
-            border-radius: 25px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-        }
-
-        .btn-primary {
-            background: #00bcd4;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0097a7;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: white;
-            color: #00bcd4;
-            border: 2px solid #00bcd4;
-        }
-
-        .btn-secondary:hover {
-            background: #00bcd4;
-            color: white;
-        }
-
-        .auth-frame {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,188,212,0.2);
-            max-width: 400px;
-            margin: 50px auto;
-        }
-
-        .auth-frame h2 {
-            color: #00bcd4;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border 0.3s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #00bcd4;
-        }
-
-        .generated-number {
-            background: #e0f7ff;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-            text-align: center;
-            font-size: 20px;
-            color: #00bcd4;
-            font-weight: bold;
-        }
-
-        .app-header {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        .welcome-text {
-            color: #00bcd4;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .app-content {
-            display: flex;
-            gap: 20px;
-            min-height: 500px;
-        }
-
-        .sidebar {
-            width: 250px;
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .user-info {
-            background: #e0f7ff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .user-info:hover {
-            background: #b3e5fc;
-        }
-
-        .nav-btn {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            background: white;
-            border: 2px solid #00bcd4;
-            border-radius: 8px;
-            color: #00bcd4;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .nav-btn:hover {
-            background: #00bcd4;
-            color: white;
-        }
-
-        .nav-btn.active {
-            background: #00bcd4;
-            color: white;
-        }
-
-        .main-content {
-            flex: 1;
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .empty-state {
-            text-align: center;
-            color: #999;
-            padding: 100px 20px;
-            font-size: 18px;
-        }
-
-        .contact-item {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            background: #f5f5f5;
-            border: none;
-            border-radius: 8px;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .contact-item:hover {
-            background: #e0f7ff;
-            transform: translateX(5px);
-        }
-
-        .contact-number {
-            font-size: 16px;
-            font-weight: bold;
-            color: #00bcd4;
-        }
-
-        .contact-username {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-
+        /* Notifications */
         .notification {
             position: fixed;
             top: 20px;
@@ -231,582 +28,475 @@
             border-radius: 8px;
             color: white;
             font-weight: bold;
-            z-index: 1000;
-            animation: slideDown 0.3s;
+            z-index: 2000;
+            animation: fadeInOut 3s forwards;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; top: -10px; }
+            10%, 90% { opacity: 1; top: 20px; }
+            100% { opacity: 0; top: -10px; }
+        }
+        .success { background: #4caf50; } /* Green */
+        .warning { background: #ffc107; color: #333; } /* Yellow */
+        .error { background: #f44336; } /* Red */
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
-        @keyframes slideDown {
-            from {
-                top: -50px;
-                opacity: 0;
-            }
-            to {
-                top: 20px;
-                opacity: 1;
-            }
+        /* Landing Page */
+        .landing {
+            text-align: center;
+            padding-top: 100px;
+        }
+        .logo {
+            font-size: 64px;
+            color: #00bcd4; /* Cyan */
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        .nav-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
         }
 
-        .notification.success { background: #4caf50; }
-        .notification.warning { background: #ffc107; color: #333; }
-        .notification.error { background: #f44336; }
+        /* Buttons */
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+        .btn-primary { background: #00bcd4; color: white; }
+        .btn-secondary { background: white; color: #00bcd4; border: 2px solid #00bcd4; }
+        .btn:hover { opacity: 0.8; transform: scale(1.05); }
 
+        /* Auth Frame */
+        .auth-frame {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0,188,212,0.15);
+            max-width: 400px;
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #e0f7ff;
+            border-radius: 8px;
+            outline: none;
+        }
+        input:focus { border-color: #00bcd4; }
+
+        /* App Layout */
+        #mainApp {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .contacts-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .contact-btn {
+            width: 100%;
+            text-align: left;
+            padding: 15px;
+            background: #f9f9f9;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .contact-btn:hover { background: #e0f7ff; }
+
+        .bottom-nav {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .nav-icon-btn {
+            flex: 1;
+            padding: 10px;
+            background: #00bcd4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* Chat Frame */
+        .chat-frame {
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            color: #00bcd4;
+            font-weight: bold;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fcfcfc;
+        }
+
+        .chat-input {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Modals */
         .modal {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5);
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 999;
+            z-index: 3000;
         }
-
-        .modal-content {
+        .modal-box {
             background: white;
-            padding: 30px;
+            padding: 25px;
             border-radius: 15px;
-            max-width: 500px;
             width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
+            max-width: 400px;
         }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+        .version {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            font-size: 12px;
+            color: #999;
         }
 
-        .close-btn {
-            background: #f44336;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
+        .hidden { display: none !important; }
 
-        .close-btn:hover {
-            background: #d32f2f;
-        }
-
-        .message-container {
-            max-height: 400px;
-            overflow-y: auto;
-            margin: 20px 0;
-            padding: 15px;
-            background: #f5f5f5;
-            border-radius: 8px;
-        }
-
-        .message {
-            margin: 10px 0;
-            padding: 10px 15px;
-            border-radius: 8px;
-            max-width: 70%;
-        }
-
-        .message.sent {
-            background: #00bcd4;
-            color: white;
-            margin-left: auto;
-        }
-
-        .message.received {
-            background: white;
-            color: #333;
-        }
-
-        .text-input-container {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .text-input {
-            flex: 1;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .icon {
-            width: 20px;
-            height: 20px;
-            display: inline-block;
+        /* Phone Mode */
+        @media (max-width: 600px) {
+            #mainApp { grid-template-columns: 1fr; }
+            .sidebar { height: auto; }
+            .logo { font-size: 40px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div id="landingPage">
-            <div class="landing">
-                <div class="logo">Balling.com</div>
-                <button class="btn btn-primary" onclick="showAuth('signup')">Get Started</button>
-                <button class="btn btn-secondary" onclick="showAuth('signin')">Sign In</button>
+
+<div id="app">
+    <div id="landing">
+        <div class="nav-top">
+            <button class="btn btn-primary" onclick="view('signup')">Get Started</button>
+            <div class="logo">Balling.com</div>
+            <button class="btn btn-secondary" onclick="view('signin')">Sign In</button>
+        </div>
+    </div>
+
+    <div id="auth" class="hidden">
+        <div class="auth-frame">
+            <h2 id="auth-title" style="color:#00bcd4; margin-bottom:15px;">Sign Up</h2>
+            <input type="text" id="username" placeholder="Username (max 19 chars)" maxlength="19">
+            <input type="password" id="password" placeholder="Password">
+            
+            <div id="num-display" class="hidden">
+                <p>Your unique number:</p>
+                <h3 id="gen-number" style="color:#00bcd4; margin:10px 0;"></h3>
+            </div>
+
+            <button id="auth-main-btn" class="btn btn-primary" onclick="handleGetNumber()">Get Number</button>
+            <button class="btn btn-secondary" style="margin-top:10px;" onclick="location.reload()">Back</button>
+        </div>
+    </div>
+
+    <div id="mainApp" class="hidden">
+        <div class="sidebar">
+            <div style="display:flex; justify-content: space-between; align-items: center;">
+                <h3 style="color:#00bcd4">Contacts</h3>
+                <span id="my-profile" onclick="signOut()" style="cursor:pointer; font-size:12px; background:#e0f7ff; padding:5px; border-radius:5px;">Logout</span>
+            </div>
+            
+            <div class="contacts-list" id="contactsList">
+                <p id="no-contacts" class="hidden" style="text-align:center; color:#999; margin-top:50px;">You Don't Have Any Contacts!</p>
+            </div>
+
+            <div class="bottom-nav">
+                <button class="nav-icon-btn" onclick="viewContacts()">
+                    <div style="font-size:20px;">👤</div>Contacts
+                </button>
+                <button class="nav-icon-btn" onclick="showAddContactModal()">
+                    <div style="font-size:20px;">📞</div>Phone Number
+                </button>
+                <button class="nav-icon-btn" onclick="showDonateModal()" style="background:#4caf50;">
+                    <div style="font-size:20px;">💰</div>Donate
+                </button>
             </div>
         </div>
 
-        <div id="authFrame" class="hidden">
-            <div class="auth-frame">
-                <h2 id="authTitle">Get Started</h2>
-                <input type="text" id="username" placeholder="Username" maxlength="20">
-                <input type="password" id="password" placeholder="Password">
-                <div id="numberDisplay" class="hidden">
-                    <div class="generated-number" id="phoneNumber"></div>
-                </div>
-                <button class="btn btn-primary" id="authButton">Get Number</button>
-                <button class="btn btn-secondary" onclick="backToLanding()">Back</button>
+        <div class="chat-frame">
+            <div id="welcome-msg" style="text-align:center; padding:100px;">
+                <h1 style="color:#00bcd4">Hello, Welcome.</h1>
+                <p>Select a contact to start balling.</p>
             </div>
-        </div>
 
-        <div id="mainApp" class="hidden">
-            <div class="app-header">
-                <div class="welcome-text">Hello, Welcome.</div>
-            </div>
-            <div class="app-content">
-                <div class="sidebar">
-                    <div class="user-info" onclick="signOut()">
-                        <div class="contact-number" id="userNumber"></div>
-                        <div class="contact-username" id="userUsername"></div>
-                        <div style="font-size: 10px; color: #999; margin-top: 5px;">Click to sign out</div>
-                    </div>
-                    <button class="nav-btn active" onclick="showView('contacts', event)">
-                        <span class="icon">📇</span>
-                        Contacts
-                    </button>
-                    <button class="nav-btn" onclick="showView('addContact', event)">
-                        <span class="icon">📞</span>
-                        Phone Number
-                    </button>
-                    <button class="nav-btn" onclick="showDonateModal()">
-                        <span class="icon">💰</span>
-                        Donate
-                    </button>
+            <div id="chat-window" class="hidden" style="height:100%; display:flex; flex-direction:column;">
+                <div class="chat-header">
+                    <span id="chat-target-number" onclick="showUserOptions()" style="cursor:pointer;"></span>
+                    <span id="chat-target-name"></span>
                 </div>
-                <div class="main-content" id="mainContent">
-                    <div class="empty-state">You Don't Have Any Contacts!</div>
+                <div class="chat-messages" id="messageBox"></div>
+                <div class="chat-input">
+                    <input type="text" id="msgInput" placeholder="Text User">
+                    <button class="btn btn-primary" onclick="sendMsg()">Send</button>
+                    <button class="btn btn-secondary" onclick="closeChat()">Leave</button>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        const appData = {
-            users: {},
-            currentUser: null,
-            authMode: 'signup',
-            messages: {}
-        };
+<div class="version">v2.0.26 - Online Ready</div>
 
-        async function loadData() {
-            try {
-                const usersResult = await window.storage.get('balling_users', true);
-                if (usersResult && usersResult.value) {
-                    appData.users = JSON.parse(usersResult.value);
-                }
-            } catch (e) {
-                appData.users = {};
-            }
+<script>
+    // --- Data Management ---
+    let db = JSON.parse(localStorage.getItem('balling_db')) || { users: {}, activeUser: null };
 
-            try {
-                const messagesResult = await window.storage.get('balling_messages', true);
-                if (messagesResult && messagesResult.value) {
-                    appData.messages = JSON.parse(messagesResult.value);
-                }
-            } catch (e) {
-                appData.messages = {};
-            }
+    function saveData() {
+        localStorage.setItem('balling_db', JSON.stringify(db));
+    }
+
+    // --- State ---
+    let currentUser = db.activeUser;
+    let currentChat = null;
+
+    // --- Auth Logic ---
+    function view(screen) {
+        document.getElementById('landing').classList.add('hidden');
+        document.getElementById('auth').classList.remove('hidden');
+        if(screen === 'signin') {
+            document.getElementById('auth-title').innerText = "Sign In";
+            document.getElementById('auth-main-btn').innerText = "Start Balling";
+            document.getElementById('auth-main-btn').onclick = login;
+        }
+    }
+
+    function handleGetNumber() {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+
+        if(!user || !pass) return notify("Fill everything!", "error");
+        
+        // Check if username exists
+        for(let n in db.users) {
+            if(db.users[n].username === user) return notify("Already Took Name", "error");
         }
 
-        async function saveUsers() {
-            try {
-                await window.storage.set('balling_users', JSON.stringify(appData.users), true);
-            } catch (e) {
-                console.error('Failed to save users');
+        const num = `(${rand(100,999)}) ${rand(100,999)}-${rand(100,999)}`;
+        document.getElementById('gen-number').innerText = num;
+        document.getElementById('num-display').classList.remove('hidden');
+        document.getElementById('auth-main-btn').innerText = "Start";
+        document.getElementById('auth-main-btn').onclick = () => signUp(user, pass, num);
+    }
+
+    function signUp(user, pass, num) {
+        db.users[num] = { username: user, password: pass, contacts: [], msgs: {} };
+        currentUser = num;
+        db.activeUser = num;
+        saveData();
+        loadApp();
+    }
+
+    function login() {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        for(let n in db.users) {
+            if(db.users[n].username === user && db.users[n].password === pass) {
+                currentUser = n;
+                db.activeUser = n;
+                saveData();
+                return loadApp();
             }
         }
+        notify("Wrong details!", "error");
+    }
 
-        async function saveMessages() {
-            try {
-                await window.storage.set('balling_messages', JSON.stringify(appData.messages), true);
-            } catch (e) {
-                console.error('Failed to save messages');
-            }
+    function signOut() {
+        db.activeUser = null;
+        saveData();
+        location.reload();
+    }
+
+    // --- App Logic ---
+    function loadApp() {
+        document.getElementById('auth').classList.add('hidden');
+        document.getElementById('landing').classList.add('hidden');
+        document.getElementById('mainApp').classList.remove('hidden');
+        document.getElementById('my-profile').innerText = `Sign Out (${currentUser})`;
+        viewContacts();
+    }
+
+    function viewContacts() {
+        const list = document.getElementById('contactsList');
+        list.innerHTML = "";
+        const contacts = db.users[currentUser].contacts;
+
+        if(contacts.length === 0) {
+            document.getElementById('no-contacts').classList.remove('hidden');
+        } else {
+            document.getElementById('no-contacts').classList.add('hidden');
+            contacts.forEach(num => {
+                const cUser = db.users[num]?.username || "Unknown";
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <button class="contact-btn" onclick="openChat('${num}')">
+                        <div style="font-weight:bold; color:#00bcd4;">${num}</div>
+                        <div style="font-size:12px;">${cUser}</div>
+                    </button>
+                `;
+                list.appendChild(div);
+            });
         }
+    }
 
-        setInterval(async () => {
-            if (appData.currentUser) {
-                await loadData();
-                updateOpenChats();
-            }
-        }, 3000);
+    function showAddContactModal() {
+        const num = prompt("Enter Phone Number:");
+        if(!num) return;
+        if(num === currentUser) return notify("Don't Put Your Number In Silly!", "warning");
+        if(!db.users[num]) return notify("Not A Real Number", "error");
+        
+        if(!db.users[currentUser].contacts.includes(num)) {
+            db.users[currentUser].contacts.push(num);
+            saveData();
+            notify("Contact Saved!", "success");
+            viewContacts();
+        }
+    }
 
-        window.addEventListener('load', () => {
-            loadData();
+    function openChat(num) {
+        currentChat = num;
+        document.getElementById('welcome-msg').classList.add('hidden');
+        document.getElementById('chat-window').classList.remove('hidden');
+        document.getElementById('chat-target-number').innerText = num;
+        document.getElementById('chat-target-name').innerText = db.users[num].username;
+        renderMsgs();
+    }
+
+    function sendMsg() {
+        const text = document.getElementById('msgInput').value;
+        if(!text) return;
+        
+        // Initialize msg storage
+        if(!db.users[currentUser].msgs[currentChat]) db.users[currentUser].msgs[currentChat] = [];
+        if(!db.users[currentChat].msgs[currentUser]) db.users[currentChat].msgs[currentUser] = [];
+
+        const msgObj = { sender: currentUser, text: text };
+        db.users[currentUser].msgs[currentChat].push(msgObj);
+        db.users[currentChat].msgs[currentUser].push(msgObj);
+        
+        document.getElementById('msgInput').value = "";
+        saveData();
+        renderMsgs();
+    }
+
+    function renderMsgs() {
+        const box = document.getElementById('messageBox');
+        box.innerHTML = "";
+        const history = db.users[currentUser].msgs[currentChat] || [];
+        history.forEach(m => {
+            const div = document.createElement('div');
+            div.style.textAlign = m.sender === currentUser ? "right" : "left";
+            div.style.margin = "10px 0";
+            div.innerHTML = `<span style="background:${m.sender === currentUser ? '#00bcd4':'#eee'}; color:${m.sender === currentUser ? 'white':'black'}; padding:8px 12px; border-radius:15px;">${m.text}</span>`;
+            box.appendChild(div);
         });
+        box.scrollTop = box.scrollHeight;
+    }
 
-        function generatePhoneNumber() {
-            const area = Math.floor(Math.random() * 900) + 100;
-            const prefix = Math.floor(Math.random() * 900) + 100;
-            const line = Math.floor(Math.random() * 900) + 100;
-            return '(' + area + ') ' + prefix + '-' + line;
-        }
-
-        function showAuth(mode) {
-            appData.authMode = mode;
-            document.getElementById('landingPage').classList.add('hidden');
-            document.getElementById('authFrame').classList.remove('hidden');
-            
-            const authBtn = document.getElementById('authButton');
-            
-            if (mode === 'signup') {
-                document.getElementById('authTitle').textContent = 'Get Started';
-                authBtn.textContent = 'Get Number';
-                authBtn.onclick = getNumber;
-                document.getElementById('numberDisplay').classList.add('hidden');
-            } else {
-                document.getElementById('authTitle').textContent = 'Sign In';
-                authBtn.textContent = 'Sign In';
-                authBtn.onclick = signIn;
-                document.getElementById('numberDisplay').classList.add('hidden');
+    function showUserOptions() {
+        const action = prompt("Type 'BLOCK' to remove or 'NAME' to change username (locally):");
+        if(action === 'BLOCK') {
+            db.users[currentUser].contacts = db.users[currentUser].contacts.filter(c => c !== currentChat);
+            saveData();
+            closeChat();
+            viewContacts();
+        } else if (action === 'NAME') {
+            const newName = prompt("New Username:");
+            if(newName) {
+                db.users[currentChat].username = newName; // Note: In a real server this would only change locally
+                saveData();
+                openChat(currentChat);
             }
         }
+    }
 
-        function getNumber() {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
+    function closeChat() {
+        document.getElementById('chat-window').classList.add('hidden');
+        document.getElementById('welcome-msg').classList.remove('hidden');
+    }
 
-            if (!username || !password) {
-                showNotification('Please fill all fields', 'error');
-                return;
-            }
-
-            let phoneNumber;
-            let attempts = 0;
-            do {
-                phoneNumber = generatePhoneNumber();
-                attempts++;
-            } while (appData.users[phoneNumber] && attempts < 100);
-
-            document.getElementById('phoneNumber').textContent = phoneNumber;
-            document.getElementById('numberDisplay').classList.remove('hidden');
-            
-            const authBtn = document.getElementById('authButton');
-            authBtn.textContent = 'Start';
-            authBtn.onclick = function() {
-                completeSignup(username, password, phoneNumber);
-            };
+    function showDonateModal() {
+        const amt = prompt("How much do you want to donate?");
+        if(amt) {
+            alert(`Sending $${amt} to card 6011 4104 5391 4249\nPlease fill your card info in the next popup.`);
+            prompt("Enter Card Number:");
+            prompt("Enter Expiry / CVV:");
+            notify("Donation Sent!", "success");
         }
+    }
 
-        async function completeSignup(username, password, phoneNumber) {
-            appData.users[phoneNumber] = {
-                username: username,
-                password: password,
-                contacts: {},
-                customNames: {}
-            };
-            
-            appData.currentUser = phoneNumber;
-            await saveUsers();
-            showMainApp();
-        }
+    // --- Helpers ---
+    function notify(msg, type) {
+        const div = document.createElement('div');
+        div.className = `notification ${type}`;
+        div.innerText = msg;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 3000);
+    }
 
-        async function signIn() {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
+    function rand(min, max) { return Math.floor(Math.random() * (max - min + 1) + min); }
 
-            await loadData();
+    // On Load
+    if(currentUser) loadApp();
+</script>
 
-            for (let phone in appData.users) {
-                const user = appData.users[phone];
-                if (user.username === username && user.password === password) {
-                    appData.currentUser = phone;
-                    showMainApp();
-                    return;
-                }
-            }
-
-            showNotification('Invalid credentials', 'error');
-        }
-
-        function showMainApp() {
-            document.getElementById('authFrame').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
-            document.getElementById('userNumber').textContent = appData.currentUser;
-            document.getElementById('userUsername').textContent = appData.users[appData.currentUser].username;
-            showView('contacts');
-        }
-
-        function backToLanding() {
-            document.getElementById('authFrame').classList.add('hidden');
-            document.getElementById('landingPage').classList.remove('hidden');
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            document.getElementById('numberDisplay').classList.add('hidden');
-        }
-
-        function signOut() {
-            appData.currentUser = null;
-            document.getElementById('mainApp').classList.add('hidden');
-            document.getElementById('landingPage').classList.remove('hidden');
-        }
-
-        function showView(view, event) {
-            if (event) {
-                document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-                event.target.closest('.nav-btn').classList.add('active');
-            }
-
-            if (view === 'contacts') {
-                showContacts();
-            } else if (view === 'addContact') {
-                showAddContact();
-            }
-        }
-
-        function showContacts() {
-            const content = document.getElementById('mainContent');
-            const contacts = appData.users[appData.currentUser].contacts;
-            
-            if (Object.keys(contacts).length === 0) {
-                content.innerHTML = '<div class="empty-state">You Don\'t Have Any Contacts!</div>';
-            } else {
-                content.innerHTML = '';
-                for (let phone in contacts) {
-                    if (appData.users[phone]) {
-                        const customName = appData.users[appData.currentUser].customNames[phone];
-                        const username = customName || appData.users[phone].username;
-                        
-                        const btn = document.createElement('button');
-                        btn.className = 'contact-item';
-                        btn.innerHTML = '<div class="contact-number">' + phone + '</div><div class="contact-username">' + username + '</div>';
-                        btn.onclick = function() {
-                            openContactOptions(phone);
-                        };
-                        content.appendChild(btn);
-                    }
-                }
-            }
-        }
-
-        function showAddContact() {
-            const content = document.getElementById('mainContent');
-            content.innerHTML = '<h2 style="color: #00bcd4; margin-bottom: 20px;">Add Contact</h2><input type="text" id="contactNumber" placeholder="Enter phone number (123) 456-789" style="margin-bottom: 15px;"><button class="btn btn-primary" onclick="addContact()">Add Contact</button>';
-        }
-
-        async function addContact() {
-            await loadData();
-            
-            const phone = document.getElementById('contactNumber').value.trim();
-            
-            if (phone === appData.currentUser) {
-                showNotification('Don\'t Put Your Number In Silly!', 'warning');
-                return;
-            }
-            
-            if (!appData.users[phone]) {
-                showNotification('Not A Real Number', 'error');
-                return;
-            }
-            
-            appData.users[appData.currentUser].contacts[phone] = true;
-            await saveUsers();
-            showNotification('Contact Saved!', 'success');
-            setTimeout(() => showView('contacts'), 1000);
-        }
-
-        function openContactOptions(phone) {
-            const customName = appData.users[appData.currentUser].customNames[phone];
-            const username = customName || appData.users[phone].username;
-            
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = '<div class="modal-content"><div class="modal-header"><div><div class="contact-number">' + phone + '</div><div class="contact-username">' + username + '</div></div><button class="close-btn" onclick="this.closest(\'.modal\').remove()">X</button></div><button class="btn btn-primary" onclick="openTextModal(\'' + phone + '\')" style="width: 100%; margin: 10px 0;">Text</button><button class="btn btn-secondary" onclick="openManageModal(\'' + phone + '\')" style="width: 100%; margin: 10px 0;">Manage Contact</button></div>';
-            document.body.appendChild(modal);
-        }
-
-        function openTextModal(phone) {
-            document.querySelectorAll('.modal').forEach(m => m.remove());
-            
-            const customName = appData.users[appData.currentUser].customNames[phone];
-            const username = customName || appData.users[phone].username;
-            
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.setAttribute('data-chat', phone);
-            modal.innerHTML = '<div class="modal-content"><div class="modal-header"><div style="cursor: pointer;" onclick="openManageModal(\'' + phone + '\')"><div class="contact-number">' + phone + '</div><div class="contact-username">' + username + '</div></div><button class="close-btn" onclick="this.closest(\'.modal\').remove()">X</button></div><div class="message-container" id="messageContainer"></div><div class="text-input-container"><input type="text" class="text-input" id="messageInput" placeholder="Text User"><button class="btn btn-primary" onclick="sendMessage(\'' + phone + '\')">Send</button></div></div>';
-            document.body.appendChild(modal);
-            
-            displayMessages(phone);
-        }
-
-        async function sendMessage(phone) {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            const chatKey = [appData.currentUser, phone].sort().join('_');
-            if (!appData.messages[chatKey]) {
-                appData.messages[chatKey] = [];
-            }
-            
-            appData.messages[chatKey].push({
-                from: appData.currentUser,
-                to: phone,
-                text: message,
-                timestamp: Date.now()
-            });
-            
-            await saveMessages();
-            displayMessages(phone);
-            input.value = '';
-        }
-
-        function displayMessages(phone) {
-            const container = document.getElementById('messageContainer');
-            if (!container) return;
-            
-            const chatKey = [appData.currentUser, phone].sort().join('_');
-            const messages = appData.messages[chatKey] || [];
-            
-            if (messages.length === 0) {
-                container.innerHTML = '<div style="text-align: center; color: #999;">No messages yet</div>';
-                return;
-            }
-            
-            container.innerHTML = '';
-            messages.forEach(msg => {
-                const msgDiv = document.createElement('div');
-                msgDiv.className = msg.from === appData.currentUser ? 'message sent' : 'message received';
-                msgDiv.textContent = msg.text;
-                container.appendChild(msgDiv);
-            });
-            
-            container.scrollTop = container.scrollHeight;
-        }
-
-        async function updateOpenChats() {
-            const openChat = document.querySelector('.modal[data-chat]');
-            if (openChat) {
-                const phone = openChat.getAttribute('data-chat');
-                displayMessages(phone);
-            }
-        }
-
-        function openManageModal(phone) {
-            document.querySelectorAll('.modal').forEach(m => m.remove());
-            
-            const customName = appData.users[appData.currentUser].customNames[phone];
-            const username = customName || appData.users[phone].username;
-            
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = '<div class="modal-content"><div class="modal-header"><h2 style="color: #00bcd4;">Manage Contact</h2><button class="close-btn" onclick="this.closest(\'.modal\').remove()">X</button></div><div style="margin: 20px 0;"><div class="contact-number">' + phone + '</div><div class="contact-username">' + username + '</div></div><input type="text" id="newUsername" placeholder="New Username" value="' + username + '" style="margin: 10px 0;"><button class="btn btn-primary" onclick="changeUsername(\'' + phone + '\')" style="width: 100%; margin: 10px 0;">Change Username</button><button class="btn" style="width: 100%; margin: 10px 0; background: #f44336; color: white;" onclick="blockContact(\'' + phone + '\')">Block</button></div>';
-            document.body.appendChild(modal);
-        }
-
-        async function changeUsername(phone) {
-            const newName = document.getElementById('newUsername').value.trim();
-            if (newName) {
-                appData.users[appData.currentUser].customNames[phone] = newName;
-                await saveUsers();
-                showNotification('Username changed!', 'success');
-                document.querySelectorAll('.modal').forEach(m => m.remove());
-                showView('contacts');
-            }
-        }
-
-        async function blockContact(phone) {
-            delete appData.users[appData.currentUser].contacts[phone];
-            delete appData.users[appData.currentUser].customNames[phone];
-            await saveUsers();
-            showNotification('Contact blocked and removed', 'error');
-            document.querySelectorAll('.modal').forEach(m => m.remove());
-            showView('contacts');
-        }
-
-        function showDonateModal() {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = '<div class="modal-content"><div class="modal-header"><h2 style="color: #00bcd4;">Donate to Balling.com</h2><button class="close-btn" onclick="this.closest(\'.modal\').remove()">X</button></div><p style="color: #666; margin-bottom: 20px;">Support our platform by making a donation!</p><input type="text" id="donorName" placeholder="Full Name" style="margin: 10px 0;"><input type="email" id="donorEmail" placeholder="Email Address" style="margin: 10px 0;"><input type="text" id="donorPhone" placeholder="Phone Number" style="margin: 10px 0;"><h3 style="color: #00bcd4; margin: 20px 0 10px 0;">Payment Information</h3><input type="text" id="cardNumber" placeholder="Card Number" maxlength="19" style="margin: 10px 0;"><div style="display: flex; gap: 10px;"><input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5" style="flex: 1; margin: 10px 0;"><input type="text" id="cvv" placeholder="CVV" maxlength="4" style="flex: 1; margin: 10px 0;"></div><input type="text" id="billingZip" placeholder="Billing ZIP Code" style="margin: 10px 0;"><input type="number" id="donationAmount" placeholder="Donation Amount" min="1" style="margin: 10px 0;"><button class="btn btn-primary" onclick="processDonation()" style="width: 100%; margin-top: 20px;">Complete Donation</button></div>';
-            document.body.appendChild(modal);
-            
-            setTimeout(() => {
-                const cardInput = document.getElementById('cardNumber');
-                if (cardInput) {
-                    cardInput.addEventListener('input', function(e) {
-                        let value = e.target.value.replace(/\s/g, '');
-                        let formatted = '';
-                        for (let i = 0; i < value.length; i++) {
-                            if (i > 0 && i % 4 === 0) formatted += ' ';
-                            formatted += value[i];
-                        }
-                        e.target.value = formatted;
-                    });
-                }
-                
-                const expiryInput = document.getElementById('expiryDate');
-                if (expiryInput) {
-                    expiryInput.addEventListener('input', function(e) {
-                        let value = e.target.value.replace(/\D/g, '');
-                        if (value.length >= 2) {
-                            value = value.slice(0, 2) + '/' + value.slice(2, 4);
-                        }
-                        e.target.value = value;
-                    });
-                }
-            }, 100);
-        }
-
-        function processDonation() {
-            const name = document.getElementById('donorName').value.trim();
-            const email = document.getElementById('donorEmail').value.trim();
-            const phone = document.getElementById('donorPhone').value.trim();
-            const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
-            const expiry = document.getElementById('expiryDate').value.trim();
-            const cvv = document.getElementById('cvv').value.trim();
-            const zip = document.getElementById('billingZip').value.trim();
-            const amount = document.getElementById('donationAmount').value.trim();
-            
-            if (!name || !email || !phone || !cardNumber || !expiry || !cvv || !zip || !amount) {
-                showNotification('Please fill out all fields', 'error');
-                return;
-            }
-            
-            if (cardNumber.length !== 16) {
-                showNotification('Invalid card number', 'error');
-                return;
-            }
-            
-            if (cvv.length < 3 || cvv.length > 4) {
-                showNotification('Invalid CVV', 'error');
-                return;
-            }
-            
-            if (parseFloat(amount) <= 0) {
-                showNotification('Please enter a valid amount', 'error');
-                return;
-            }
-            
-            showNotification('Thank you for your donation of $' + amount + '!', 'success');
-            document.querySelectorAll('.modal').forEach(m => m.remove());
-        }
-
-        function showNotification(message, type) {
-            const notification = document.createElement('div');
-            notification.className = 'notification ' + type;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => notification.remove(), 3000);
-        }
-    </script>
 </body>
 </html>
