@@ -360,7 +360,7 @@
                 <div id="numberDisplay" class="hidden">
                     <div class="generated-number" id="phoneNumber"></div>
                 </div>
-                <button class="btn btn-primary" id="authButton" onclick="handleAuth()">Get Number</button>
+                <button class="btn btn-primary" id="authButton">Get Number</button>
                 <button class="btn btn-secondary" onclick="backToLanding()">Back</button>
             </div>
         </div>
@@ -376,11 +376,11 @@
                         <div class="contact-username" id="userUsername"></div>
                         <div style="font-size: 10px; color: #999; margin-top: 5px;">Click to sign out</div>
                     </div>
-                    <button class="nav-btn active" onclick="showView('contacts')">
+                    <button class="nav-btn active" onclick="showView('contacts', event)">
                         <span class="icon">📇</span>
                         Contacts
                     </button>
-                    <button class="nav-btn" onclick="showView('addContact')">
+                    <button class="nav-btn" onclick="showView('addContact', event)">
                         <span class="icon">📞</span>
                         Phone Number
                     </button>
@@ -406,26 +406,37 @@
 
         async function loadData() {
             try {
-                const usersData = await window.storage.get('balling_users');
-                const messagesData = await window.storage.get('balling_messages');
-                
-                if (usersData) {
-                    appData.users = JSON.parse(usersData.value);
+                const usersResult = await window.storage.get('balling_users', true);
+                if (usersResult && usersResult.value) {
+                    appData.users = JSON.parse(usersResult.value);
                 }
-                if (messagesData) {
-                    appData.messages = JSON.parse(messagesData.value);
+            } catch (e) {
+                appData.users = {};
+            }
+
+            try {
+                const messagesResult = await window.storage.get('balling_messages', true);
+                if (messagesResult && messagesResult.value) {
+                    appData.messages = JSON.parse(messagesResult.value);
                 }
-            } catch (error) {
-                console.log('No existing data');
+            } catch (e) {
+                appData.messages = {};
             }
         }
 
-        async function saveData() {
+        async function saveUsers() {
             try {
-                await window.storage.set('balling_users', JSON.stringify(appData.users));
-                await window.storage.set('balling_messages', JSON.stringify(appData.messages));
-            } catch (error) {
-                console.error('Save failed:', error);
+                await window.storage.set('balling_users', JSON.stringify(appData.users), true);
+            } catch (e) {
+                console.error('Failed to save users');
+            }
+        }
+
+        async function saveMessages() {
+            try {
+                await window.storage.set('balling_messages', JSON.stringify(appData.messages), true);
+            } catch (e) {
+                console.error('Failed to save messages');
             }
         }
 
@@ -434,15 +445,17 @@
                 await loadData();
                 updateOpenChats();
             }
-        }, 2000);
+        }, 3000);
 
-        loadData();
+        window.addEventListener('load', () => {
+            loadData();
+        });
 
         function generatePhoneNumber() {
             const area = Math.floor(Math.random() * 900) + 100;
             const prefix = Math.floor(Math.random() * 900) + 100;
             const line = Math.floor(Math.random() * 900) + 100;
-            return `(${area}) ${prefix}-${line}`;
+            return '(' + area + ') ' + prefix + '-' + line;
         }
 
         function showAuth(mode) {
@@ -450,15 +463,17 @@
             document.getElementById('landingPage').classList.add('hidden');
             document.getElementById('authFrame').classList.remove('hidden');
             
+            const authBtn = document.getElementById('authButton');
+            
             if (mode === 'signup') {
                 document.getElementById('authTitle').textContent = 'Get Started';
-                document.getElementById('authButton').textContent = 'Get Number';
-                document.getElementById('authButton').onclick = getNumber;
+                authBtn.textContent = 'Get Number';
+                authBtn.onclick = getNumber;
                 document.getElementById('numberDisplay').classList.add('hidden');
             } else {
                 document.getElementById('authTitle').textContent = 'Sign In';
-                document.getElementById('authButton').textContent = 'Sign In';
-                document.getElementById('authButton').onclick = signIn;
+                authBtn.textContent = 'Sign In';
+                authBtn.onclick = signIn;
                 document.getElementById('numberDisplay').classList.add('hidden');
             }
         }
@@ -481,11 +496,15 @@
 
             document.getElementById('phoneNumber').textContent = phoneNumber;
             document.getElementById('numberDisplay').classList.remove('hidden');
-            document.getElementById('authButton').textContent = 'Start';
-            document.getElementById('authButton').onclick = () => completeSignup(username, password, phoneNumber);
+            
+            const authBtn = document.getElementById('authButton');
+            authBtn.textContent = 'Start';
+            authBtn.onclick = function() {
+                completeSignup(username, password, phoneNumber);
+            };
         }
 
-        function completeSignup(username, password, phoneNumber) {
+        async function completeSignup(username, password, phoneNumber) {
             appData.users[phoneNumber] = {
                 username: username,
                 password: password,
@@ -494,13 +513,15 @@
             };
             
             appData.currentUser = phoneNumber;
-            saveData();
+            await saveUsers();
             showMainApp();
         }
 
-        function signIn() {
+        async function signIn() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
+
+            await loadData();
 
             for (let phone in appData.users) {
                 const user = appData.users[phone];
@@ -536,9 +557,11 @@
             document.getElementById('landingPage').classList.remove('hidden');
         }
 
-        function showView(view) {
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+        function showView(view, event) {
+            if (event) {
+                document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.closest('.nav-btn').classList.add('active');
+            }
 
             if (view === 'contacts') {
                 showContacts();
@@ -556,31 +579,30 @@
             } else {
                 content.innerHTML = '';
                 for (let phone in contacts) {
-                    const customName = appData.users[appData.currentUser].customNames[phone];
-                    const username = customName || appData.users[phone].username;
-                    
-                    const btn = document.createElement('button');
-                    btn.className = 'contact-item';
-                    btn.innerHTML = `
-                        <div class="contact-number">${phone}</div>
-                        <div class="contact-username">${username}</div>
-                    `;
-                    btn.onclick = () => openContactOptions(phone);
-                    content.appendChild(btn);
+                    if (appData.users[phone]) {
+                        const customName = appData.users[appData.currentUser].customNames[phone];
+                        const username = customName || appData.users[phone].username;
+                        
+                        const btn = document.createElement('button');
+                        btn.className = 'contact-item';
+                        btn.innerHTML = '<div class="contact-number">' + phone + '</div><div class="contact-username">' + username + '</div>';
+                        btn.onclick = function() {
+                            openContactOptions(phone);
+                        };
+                        content.appendChild(btn);
+                    }
                 }
             }
         }
 
         function showAddContact() {
             const content = document.getElementById('mainContent');
-            content.innerHTML = `
-                <h2 style="color: #00bcd4; margin-bottom: 20px;">Add Contact</h2>
-                <input type="text" id="contactNumber" placeholder="Enter phone number (123) 456-789" style="margin-bottom: 15px;">
-                <button class="btn btn-primary" onclick="addContact()">Add Contact</button>
-            `;
+            content.innerHTML = '<h2 style="color: #00bcd4; margin-bottom: 20px;">Add Contact</h2><input type="text" id="contactNumber" placeholder="Enter phone number (123) 456-789" style="margin-bottom: 15px;"><button class="btn btn-primary" onclick="addContact()">Add Contact</button>';
         }
 
-        function addContact() {
+        async function addContact() {
+            await loadData();
+            
             const phone = document.getElementById('contactNumber').value.trim();
             
             if (phone === appData.currentUser) {
@@ -594,7 +616,7 @@
             }
             
             appData.users[appData.currentUser].contacts[phone] = true;
-            saveData();
+            await saveUsers();
             showNotification('Contact Saved!', 'success');
             setTimeout(() => showView('contacts'), 1000);
         }
@@ -605,19 +627,7 @@
             
             const modal = document.createElement('div');
             modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <div>
-                            <div class="contact-number">${phone}</div>
-                            <div class="contact-username">${username}</div>
-                        </div>
-                        <button class="close-btn" onclick="this.closest('.modal').remove()">X</button>
-                    </div>
-                    <button class="btn btn-primary" onclick="openTextModal('${phone}')" style="width: 100%; margin: 10px 0;">Text</button>
-                    <button class="btn btn-secondary" onclick="openManageModal('${phone}')" style="width: 100%; margin: 10px 0;">Manage Contact</button>
-                </div>
-            `;
+            modal.innerHTML = '<div class="modal-content"><div class="modal-header"><div><div class="contact-number">' + phone + '</div><div class="contact-username">' + username + '</div></div><button class="close-btn" onclick="this.closest(\'.modal\').remove()">X</button></div><button class="btn btn-primary" onclick="openTextModal(\'' + phone + '\')" style="width: 100%; margin: 10px 0;">Text</button><button class="btn btn-secondary" onclick="openManageModal(\'' + phone + '\')" style="width: 100%; margin: 10px 0;">Manage Contact</button></div>';
             document.body.appendChild(modal);
         }
 
@@ -627,36 +637,16 @@
             const customName = appData.users[appData.currentUser].customNames[phone];
             const username = customName || appData.users[phone].username;
             
-            const chatKey = [appData.currentUser, phone].sort().join('_');
-            const messages = appData.messages[chatKey] || [];
-            
             const modal = document.createElement('div');
             modal.className = 'modal';
             modal.setAttribute('data-chat', phone);
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <div style="cursor: pointer;" onclick="openManageModal('${phone}')">
-                            <div class="contact-number">${phone}</div>
-                            <div class="contact-username">${username}</div>
-                        </div>
-                        <button class="close-btn" onclick="this.closest('.modal').remove()">X</button>
-                    </div>
-                    <div class="message-container" id="messageContainer">
-                        ${messages.length === 0 ? '<div style="text-align: center; color: #999;">No messages yet</div>' : ''}
-                    </div>
-                    <div class="text-input-container">
-                        <input type="text" class="text-input" id="messageInput" placeholder="Text User">
-                        <button class="btn btn-primary" onclick="sendMessage('${phone}')">Send</button>
-                    </div>
-                </div>
-            `;
+            modal.innerHTML = '<div class="modal-content"><div class="modal-header"><div style="cursor: pointer;" onclick="openManageModal(\'' + phone + '\')"><div class="contact-number">' + phone + '</div><div class="contact-username">' + username + '</div></div><button class="close-btn" onclick="this.closest(\'.modal\').remove()">X</button></div><div class="message-container" id="messageContainer"></div><div class="text-input-container"><input type="text" class="text-input" id="messageInput" placeholder="Text User"><button class="btn btn-primary" onclick="sendMessage(\'' + phone + '\')">Send</button></div></div>';
             document.body.appendChild(modal);
             
-            displayMessages(chatKey);
+            displayMessages(phone);
         }
 
-        function sendMessage(phone) {
+        async function sendMessage(phone) {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
             
@@ -674,13 +664,16 @@
                 timestamp: Date.now()
             });
             
-            saveData();
-            displayMessages(chatKey);
+            await saveMessages();
+            displayMessages(phone);
             input.value = '';
         }
 
-        function displayMessages(chatKey) {
+        function displayMessages(phone) {
             const container = document.getElementById('messageContainer');
+            if (!container) return;
+            
+            const chatKey = [appData.currentUser, phone].sort().join('_');
             const messages = appData.messages[chatKey] || [];
             
             if (messages.length === 0) {
@@ -699,12 +692,11 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        function updateOpenChats() {
+        async function updateOpenChats() {
             const openChat = document.querySelector('.modal[data-chat]');
             if (openChat) {
                 const phone = openChat.getAttribute('data-chat');
-                const chatKey = [appData.currentUser, phone].sort().join('_');
-                displayMessages(chatKey);
+                displayMessages(phone);
             }
         }
 
@@ -716,39 +708,25 @@
             
             const modal = document.createElement('div');
             modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 style="color: #00bcd4;">Manage Contact</h2>
-                        <button class="close-btn" onclick="this.closest('.modal').remove()">X</button>
-                    </div>
-                    <div style="margin: 20px 0;">
-                        <div class="contact-number">${phone}</div>
-                        <div class="contact-username">${username}</div>
-                    </div>
-                    <input type="text" id="newUsername" placeholder="New Username" value="${username}" style="margin: 10px 0;">
-                    <button class="btn btn-primary" onclick="changeUsername('${phone}')" style="width: 100%; margin: 10px 0;">Change Username</button>
-                    <button class="btn" style="width: 100%; margin: 10px 0; background: #f44336; color: white;" onclick="blockContact('${phone}')">Block</button>
-                </div>
-            `;
+            modal.innerHTML = '<div class="modal-content"><div class="modal-header"><h2 style="color: #00bcd4;">Manage Contact</h2><button class="close-btn" onclick="this.closest(\'.modal\').remove()">X</button></div><div style="margin: 20px 0;"><div class="contact-number">' + phone + '</div><div class="contact-username">' + username + '</div></div><input type="text" id="newUsername" placeholder="New Username" value="' + username + '" style="margin: 10px 0;"><button class="btn btn-primary" onclick="changeUsername(\'' + phone + '\')" style="width: 100%; margin: 10px 0;">Change Username</button><button class="btn" style="width: 100%; margin: 10px 0; background: #f44336; color: white;" onclick="blockContact(\'' + phone + '\')">Block</button></div>';
             document.body.appendChild(modal);
         }
 
-        function changeUsername(phone) {
+        async function changeUsername(phone) {
             const newName = document.getElementById('newUsername').value.trim();
             if (newName) {
                 appData.users[appData.currentUser].customNames[phone] = newName;
-                saveData();
+                await saveUsers();
                 showNotification('Username changed!', 'success');
                 document.querySelectorAll('.modal').forEach(m => m.remove());
                 showView('contacts');
             }
         }
 
-        function blockContact(phone) {
+        async function blockContact(phone) {
             delete appData.users[appData.currentUser].contacts[phone];
             delete appData.users[appData.currentUser].customNames[phone];
-            saveData();
+            await saveUsers();
             showNotification('Contact blocked and removed', 'error');
             document.querySelectorAll('.modal').forEach(m => m.remove());
             showView('contacts');
@@ -757,46 +735,34 @@
         function showDonateModal() {
             const modal = document.createElement('div');
             modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 style="color: #00bcd4;">Donate to Balling.com</h2>
-                        <button class="close-btn" onclick="this.closest('.modal').remove()">X</button>
-                    </div>
-                    <p style="color: #666; margin-bottom: 20px;">Support our platform by making a donation!</p>
-                    
-                    <input type="text" id="donorName" placeholder="Full Name" style="margin: 10px 0;">
-                    <input type="email" id="donorEmail" placeholder="Email Address" style="margin: 10px 0;">
-                    <input type="text" id="donorPhone" placeholder="Phone Number" style="margin: 10px 0;">
-                    
-                    <h3 style="color: #00bcd4; margin: 20px 0 10px 0;">Payment Information</h3>
-                    <input type="text" id="cardNumber" placeholder="Card Number" maxlength="19" style="margin: 10px 0;">
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5" style="flex: 1; margin: 10px 0;">
-                        <input type="text" id="cvv" placeholder="CVV" maxlength="4" style="flex: 1; margin: 10px 0;">
-                    </div>
-                    <input type="text" id="billingZip" placeholder="Billing ZIP Code" style="margin: 10px 0;">
-                    
-                    <input type="number" id="donationAmount" placeholder="Donation Amount" min="1" style="margin: 10px 0;">
-                    
-                    <button class="btn btn-primary" onclick="processDonation()" style="width: 100%; margin-top: 20px;">Complete Donation</button>
-                </div>
-            `;
+            modal.innerHTML = '<div class="modal-content"><div class="modal-header"><h2 style="color: #00bcd4;">Donate to Balling.com</h2><button class="close-btn" onclick="this.closest(\'.modal\').remove()">X</button></div><p style="color: #666; margin-bottom: 20px;">Support our platform by making a donation!</p><input type="text" id="donorName" placeholder="Full Name" style="margin: 10px 0;"><input type="email" id="donorEmail" placeholder="Email Address" style="margin: 10px 0;"><input type="text" id="donorPhone" placeholder="Phone Number" style="margin: 10px 0;"><h3 style="color: #00bcd4; margin: 20px 0 10px 0;">Payment Information</h3><input type="text" id="cardNumber" placeholder="Card Number" maxlength="19" style="margin: 10px 0;"><div style="display: flex; gap: 10px;"><input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5" style="flex: 1; margin: 10px 0;"><input type="text" id="cvv" placeholder="CVV" maxlength="4" style="flex: 1; margin: 10px 0;"></div><input type="text" id="billingZip" placeholder="Billing ZIP Code" style="margin: 10px 0;"><input type="number" id="donationAmount" placeholder="Donation Amount" min="1" style="margin: 10px 0;"><button class="btn btn-primary" onclick="processDonation()" style="width: 100%; margin-top: 20px;">Complete Donation</button></div>';
             document.body.appendChild(modal);
             
-            document.getElementById('cardNumber').addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\s/g, '');
-                let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
-                e.target.value = formattedValue;
-            });
-            
-            document.getElementById('expiryDate').addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\D/g, '');
-                if (value.length >= 2) {
-                    value = value.slice(0, 2) + '/' + value.slice(2, 4);
+            setTimeout(() => {
+                const cardInput = document.getElementById('cardNumber');
+                if (cardInput) {
+                    cardInput.addEventListener('input', function(e) {
+                        let value = e.target.value.replace(/\s/g, '');
+                        let formatted = '';
+                        for (let i = 0; i < value.length; i++) {
+                            if (i > 0 && i % 4 === 0) formatted += ' ';
+                            formatted += value[i];
+                        }
+                        e.target.value = formatted;
+                    });
                 }
-                e.target.value = value;
-            });
+                
+                const expiryInput = document.getElementById('expiryDate');
+                if (expiryInput) {
+                    expiryInput.addEventListener('input', function(e) {
+                        let value = e.target.value.replace(/\D/g, '');
+                        if (value.length >= 2) {
+                            value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                        }
+                        e.target.value = value;
+                    });
+                }
+            }, 100);
         }
 
         function processDonation() {
@@ -835,7 +801,7 @@
 
         function showNotification(message, type) {
             const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
+            notification.className = 'notification ' + type;
             notification.textContent = message;
             document.body.appendChild(notification);
             
