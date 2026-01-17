@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balling</title>
+    <title>Balling.com</title>
     <style>
         * {
             margin: 0;
@@ -23,7 +23,6 @@
             padding: 20px;
         }
 
-        /* Landing Page */
         .landing {
             text-align: center;
             padding-top: 100px;
@@ -68,7 +67,6 @@
             color: white;
         }
 
-        /* Auth Frame */
         .auth-frame {
             background: white;
             padding: 40px;
@@ -110,7 +108,6 @@
             font-weight: bold;
         }
 
-        /* Main App */
         .app-header {
             background: white;
             padding: 20px;
@@ -347,16 +344,14 @@
 </head>
 <body>
     <div class="container">
-        <!-- Landing Page -->
         <div id="landingPage">
             <div class="landing">
-                <div class="logo">Balling.website</div>
+                <div class="logo">Balling.com</div>
                 <button class="btn btn-primary" onclick="showAuth('signup')">Get Started</button>
                 <button class="btn btn-secondary" onclick="showAuth('signin')">Sign In</button>
             </div>
         </div>
 
-        <!-- Auth Frame -->
         <div id="authFrame" class="hidden">
             <div class="auth-frame">
                 <h2 id="authTitle">Get Started</h2>
@@ -370,7 +365,6 @@
             </div>
         </div>
 
-        <!-- Main App -->
         <div id="mainApp" class="hidden">
             <div class="app-header">
                 <div class="welcome-text">Hello, Welcome.</div>
@@ -390,6 +384,10 @@
                         <span class="icon">📞</span>
                         Phone Number
                     </button>
+                    <button class="nav-btn" onclick="showDonateModal()">
+                        <span class="icon">💰</span>
+                        Donate
+                    </button>
                 </div>
                 <div class="main-content" id="mainContent">
                     <div class="empty-state">You Don't Have Any Contacts!</div>
@@ -402,8 +400,43 @@
         const appData = {
             users: {},
             currentUser: null,
-            authMode: 'signup'
+            authMode: 'signup',
+            messages: {}
         };
+
+        async function loadData() {
+            try {
+                const usersData = await window.storage.get('balling_users');
+                const messagesData = await window.storage.get('balling_messages');
+                
+                if (usersData) {
+                    appData.users = JSON.parse(usersData.value);
+                }
+                if (messagesData) {
+                    appData.messages = JSON.parse(messagesData.value);
+                }
+            } catch (error) {
+                console.log('No existing data');
+            }
+        }
+
+        async function saveData() {
+            try {
+                await window.storage.set('balling_users', JSON.stringify(appData.users));
+                await window.storage.set('balling_messages', JSON.stringify(appData.messages));
+            } catch (error) {
+                console.error('Save failed:', error);
+            }
+        }
+
+        setInterval(async () => {
+            if (appData.currentUser) {
+                await loadData();
+                updateOpenChats();
+            }
+        }, 2000);
+
+        loadData();
 
         function generatePhoneNumber() {
             const area = Math.floor(Math.random() * 900) + 100;
@@ -461,6 +494,7 @@
             };
             
             appData.currentUser = phoneNumber;
+            saveData();
             showMainApp();
         }
 
@@ -506,8 +540,6 @@
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
 
-            const content = document.getElementById('mainContent');
-            
             if (view === 'contacts') {
                 showContacts();
             } else if (view === 'addContact') {
@@ -562,6 +594,7 @@
             }
             
             appData.users[appData.currentUser].contacts[phone] = true;
+            saveData();
             showNotification('Contact Saved!', 'success');
             setTimeout(() => showView('contacts'), 1000);
         }
@@ -579,7 +612,7 @@
                             <div class="contact-number">${phone}</div>
                             <div class="contact-username">${username}</div>
                         </div>
-                        <button class="close-btn" onclick="this.closest('.modal').remove()">✕</button>
+                        <button class="close-btn" onclick="this.closest('.modal').remove()">X</button>
                     </div>
                     <button class="btn btn-primary" onclick="openTextModal('${phone}')" style="width: 100%; margin: 10px 0;">Text</button>
                     <button class="btn btn-secondary" onclick="openManageModal('${phone}')" style="width: 100%; margin: 10px 0;">Manage Contact</button>
@@ -594,8 +627,12 @@
             const customName = appData.users[appData.currentUser].customNames[phone];
             const username = customName || appData.users[phone].username;
             
+            const chatKey = [appData.currentUser, phone].sort().join('_');
+            const messages = appData.messages[chatKey] || [];
+            
             const modal = document.createElement('div');
             modal.className = 'modal';
+            modal.setAttribute('data-chat', phone);
             modal.innerHTML = `
                 <div class="modal-content">
                     <div class="modal-header">
@@ -603,10 +640,10 @@
                             <div class="contact-number">${phone}</div>
                             <div class="contact-username">${username}</div>
                         </div>
-                        <button class="close-btn" onclick="this.closest('.modal').remove()">✕</button>
+                        <button class="close-btn" onclick="this.closest('.modal').remove()">X</button>
                     </div>
                     <div class="message-container" id="messageContainer">
-                        <div style="text-align: center; color: #999;">No messages yet</div>
+                        ${messages.length === 0 ? '<div style="text-align: center; color: #999;">No messages yet</div>' : ''}
                     </div>
                     <div class="text-input-container">
                         <input type="text" class="text-input" id="messageInput" placeholder="Text User">
@@ -615,6 +652,8 @@
                 </div>
             `;
             document.body.appendChild(modal);
+            
+            displayMessages(chatKey);
         }
 
         function sendMessage(phone) {
@@ -623,18 +662,50 @@
             
             if (!message) return;
             
-            const container = document.getElementById('messageContainer');
-            if (container.children[0].textContent === 'No messages yet') {
-                container.innerHTML = '';
+            const chatKey = [appData.currentUser, phone].sort().join('_');
+            if (!appData.messages[chatKey]) {
+                appData.messages[chatKey] = [];
             }
             
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'message sent';
-            msgDiv.textContent = message;
-            container.appendChild(msgDiv);
+            appData.messages[chatKey].push({
+                from: appData.currentUser,
+                to: phone,
+                text: message,
+                timestamp: Date.now()
+            });
             
+            saveData();
+            displayMessages(chatKey);
             input.value = '';
+        }
+
+        function displayMessages(chatKey) {
+            const container = document.getElementById('messageContainer');
+            const messages = appData.messages[chatKey] || [];
+            
+            if (messages.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #999;">No messages yet</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            messages.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = msg.from === appData.currentUser ? 'message sent' : 'message received';
+                msgDiv.textContent = msg.text;
+                container.appendChild(msgDiv);
+            });
+            
             container.scrollTop = container.scrollHeight;
+        }
+
+        function updateOpenChats() {
+            const openChat = document.querySelector('.modal[data-chat]');
+            if (openChat) {
+                const phone = openChat.getAttribute('data-chat');
+                const chatKey = [appData.currentUser, phone].sort().join('_');
+                displayMessages(chatKey);
+            }
         }
 
         function openManageModal(phone) {
@@ -649,7 +720,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 style="color: #00bcd4;">Manage Contact</h2>
-                        <button class="close-btn" onclick="this.closest('.modal').remove()">✕</button>
+                        <button class="close-btn" onclick="this.closest('.modal').remove()">X</button>
                     </div>
                     <div style="margin: 20px 0;">
                         <div class="contact-number">${phone}</div>
@@ -667,6 +738,7 @@
             const newName = document.getElementById('newUsername').value.trim();
             if (newName) {
                 appData.users[appData.currentUser].customNames[phone] = newName;
+                saveData();
                 showNotification('Username changed!', 'success');
                 document.querySelectorAll('.modal').forEach(m => m.remove());
                 showView('contacts');
@@ -676,9 +748,89 @@
         function blockContact(phone) {
             delete appData.users[appData.currentUser].contacts[phone];
             delete appData.users[appData.currentUser].customNames[phone];
+            saveData();
             showNotification('Contact blocked and removed', 'error');
             document.querySelectorAll('.modal').forEach(m => m.remove());
             showView('contacts');
+        }
+
+        function showDonateModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 style="color: #00bcd4;">Donate to Balling.com</h2>
+                        <button class="close-btn" onclick="this.closest('.modal').remove()">X</button>
+                    </div>
+                    <p style="color: #666; margin-bottom: 20px;">Support our platform by making a donation!</p>
+                    
+                    <input type="text" id="donorName" placeholder="Full Name" style="margin: 10px 0;">
+                    <input type="email" id="donorEmail" placeholder="Email Address" style="margin: 10px 0;">
+                    <input type="text" id="donorPhone" placeholder="Phone Number" style="margin: 10px 0;">
+                    
+                    <h3 style="color: #00bcd4; margin: 20px 0 10px 0;">Payment Information</h3>
+                    <input type="text" id="cardNumber" placeholder="Card Number" maxlength="19" style="margin: 10px 0;">
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5" style="flex: 1; margin: 10px 0;">
+                        <input type="text" id="cvv" placeholder="CVV" maxlength="4" style="flex: 1; margin: 10px 0;">
+                    </div>
+                    <input type="text" id="billingZip" placeholder="Billing ZIP Code" style="margin: 10px 0;">
+                    
+                    <input type="number" id="donationAmount" placeholder="Donation Amount" min="1" style="margin: 10px 0;">
+                    
+                    <button class="btn btn-primary" onclick="processDonation()" style="width: 100%; margin-top: 20px;">Complete Donation</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            document.getElementById('cardNumber').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\s/g, '');
+                let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+                e.target.value = formattedValue;
+            });
+            
+            document.getElementById('expiryDate').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length >= 2) {
+                    value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                }
+                e.target.value = value;
+            });
+        }
+
+        function processDonation() {
+            const name = document.getElementById('donorName').value.trim();
+            const email = document.getElementById('donorEmail').value.trim();
+            const phone = document.getElementById('donorPhone').value.trim();
+            const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+            const expiry = document.getElementById('expiryDate').value.trim();
+            const cvv = document.getElementById('cvv').value.trim();
+            const zip = document.getElementById('billingZip').value.trim();
+            const amount = document.getElementById('donationAmount').value.trim();
+            
+            if (!name || !email || !phone || !cardNumber || !expiry || !cvv || !zip || !amount) {
+                showNotification('Please fill out all fields', 'error');
+                return;
+            }
+            
+            if (cardNumber.length !== 16) {
+                showNotification('Invalid card number', 'error');
+                return;
+            }
+            
+            if (cvv.length < 3 || cvv.length > 4) {
+                showNotification('Invalid CVV', 'error');
+                return;
+            }
+            
+            if (parseFloat(amount) <= 0) {
+                showNotification('Please enter a valid amount', 'error');
+                return;
+            }
+            
+            showNotification('Thank you for your donation of $' + amount + '!', 'success');
+            document.querySelectorAll('.modal').forEach(m => m.remove());
         }
 
         function showNotification(message, type) {
