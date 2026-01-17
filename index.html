@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balling.com</title>
+    <title>Balling.com | Online Sync</title>
     <style>
         * {
             margin: 0;
@@ -28,7 +28,7 @@
             border-radius: 8px;
             color: white;
             font-weight: bold;
-            z-index: 2000;
+            z-index: 4000;
             animation: fadeInOut 3s forwards;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
@@ -37,9 +37,9 @@
             10%, 90% { opacity: 1; top: 20px; }
             100% { opacity: 0; top: -10px; }
         }
-        .success { background: #4caf50; } /* Green */
-        .warning { background: #ffc107; color: #333; } /* Yellow */
-        .error { background: #f44336; } /* Red */
+        .success { background: #4caf50; }
+        .warning { background: #ffc107; color: #333; }
+        .error { background: #f44336; }
 
         .container {
             max-width: 1200px;
@@ -54,7 +54,7 @@
         }
         .logo {
             font-size: 64px;
-            color: #00bcd4; /* Cyan */
+            color: #00bcd4;
             font-weight: bold;
             margin-bottom: 30px;
         }
@@ -106,6 +106,7 @@
             grid-template-columns: 300px 1fr;
             gap: 20px;
             margin-top: 20px;
+            padding: 0 20px;
         }
 
         .sidebar {
@@ -138,20 +139,21 @@
         .contact-btn:hover { background: #e0f7ff; }
 
         .bottom-nav {
-            display: flex;
-            gap: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
             margin-top: 10px;
         }
 
         .nav-icon-btn {
-            flex: 1;
-            padding: 10px;
+            padding: 10px 5px;
             background: #00bcd4;
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 12px;
+            font-size: 11px;
             text-align: center;
+            cursor: pointer;
         }
 
         /* Chat Frame */
@@ -161,6 +163,7 @@
             display: flex;
             flex-direction: column;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            height: 80vh;
         }
 
         .chat-header {
@@ -185,24 +188,6 @@
             gap: 10px;
         }
 
-        /* Modals */
-        .modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 3000;
-        }
-        .modal-box {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 400px;
-        }
-
         .version {
             position: fixed;
             bottom: 10px;
@@ -213,7 +198,6 @@
 
         .hidden { display: none !important; }
 
-        /* Phone Mode */
         @media (max-width: 600px) {
             #mainApp { grid-template-columns: 1fr; }
             .sidebar { height: auto; }
@@ -235,7 +219,7 @@
     <div id="auth" class="hidden">
         <div class="auth-frame">
             <h2 id="auth-title" style="color:#00bcd4; margin-bottom:15px;">Sign Up</h2>
-            <input type="text" id="username" placeholder="Username (max 19 chars)" maxlength="19">
+            <input type="text" id="username" placeholder="Username" maxlength="19">
             <input type="password" id="password" placeholder="Password">
             
             <div id="num-display" class="hidden">
@@ -252,30 +236,25 @@
         <div class="sidebar">
             <div style="display:flex; justify-content: space-between; align-items: center;">
                 <h3 style="color:#00bcd4">Contacts</h3>
-                <span id="my-profile" onclick="signOut()" style="cursor:pointer; font-size:12px; background:#e0f7ff; padding:5px; border-radius:5px;">Logout</span>
+                <span id="my-profile" onclick="signOut()" style="cursor:pointer; font-size:10px; background:#e0f7ff; padding:5px; border-radius:5px;">Logout</span>
             </div>
             
             <div class="contacts-list" id="contactsList">
-                <p id="no-contacts" class="hidden" style="text-align:center; color:#999; margin-top:50px;">You Don't Have Any Contacts!</p>
+                <p id="no-contacts" class="hidden" style="text-align:center; color:#999; margin-top:50px;">No Contacts Yet!</p>
             </div>
 
             <div class="bottom-nav">
-                <button class="nav-icon-btn" onclick="viewContacts()">
-                    <div style="font-size:20px;">👤</div>Contacts
-                </button>
-                <button class="nav-icon-btn" onclick="showAddContactModal()">
-                    <div style="font-size:20px;">📞</div>Phone Number
-                </button>
-                <button class="nav-icon-btn" onclick="showDonateModal()" style="background:#4caf50;">
-                    <div style="font-size:20px;">💰</div>Donate
-                </button>
+                <button class="nav-icon-btn" onclick="showAddContactModal()">📞 Add Num</button>
+                <button class="nav-icon-btn" onclick="exportData()" style="background:#673ab7;">☁️ Get Sync</button>
+                <button class="nav-icon-btn" onclick="importData()" style="background:#9c27b0;">📲 Use Sync</button>
+                <button class="nav-icon-btn" onclick="showDonateModal()" style="background:#4caf50;">💰 Donate</button>
             </div>
         </div>
 
         <div class="chat-frame">
             <div id="welcome-msg" style="text-align:center; padding:100px;">
-                <h1 style="color:#00bcd4">Hello, Welcome.</h1>
-                <p>Select a contact to start balling.</p>
+                <h1 style="color:#00bcd4">Balling Online</h1>
+                <p>Select a contact or use "Get Sync" to move to another device.</p>
             </div>
 
             <div id="chat-window" class="hidden" style="height:100%; display:flex; flex-direction:column;">
@@ -285,16 +264,16 @@
                 </div>
                 <div class="chat-messages" id="messageBox"></div>
                 <div class="chat-input">
-                    <input type="text" id="msgInput" placeholder="Text User">
+                    <input type="text" id="msgInput" placeholder="Type a message...">
                     <button class="btn btn-primary" onclick="sendMsg()">Send</button>
-                    <button class="btn btn-secondary" onclick="closeChat()">Leave</button>
+                    <button class="btn btn-secondary" onclick="closeChat()">Exit</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="version">v2.0.26 - Online Ready</div>
+<div class="version">v2.1 - Multi-Device Ready</div>
 
 <script>
     // --- Data Management ---
@@ -304,11 +283,41 @@
         localStorage.setItem('balling_db', JSON.stringify(db));
     }
 
-    // --- State ---
     let currentUser = db.activeUser;
     let currentChat = null;
 
-    // --- Auth Logic ---
+    // --- NEW: Sync Logic for Other Devices ---
+    function exportData() {
+        const dataStr = JSON.stringify(db);
+        const encoded = btoa(unescape(encodeURIComponent(dataStr))); 
+        const dummy = document.createElement("textarea");
+        document.body.appendChild(dummy);
+        dummy.value = encoded;
+        dummy.select();
+        document.execCommand("copy");
+        document.body.removeChild(dummy);
+        alert("Sync Code Copied! Paste this code on your other device using 'Use Sync'.");
+    }
+
+    function importData() {
+        const code = prompt("Paste your Sync Code from your other device:");
+        if(code) {
+            try {
+                const decoded = decodeURIComponent(escape(atob(code)));
+                const importedDb = JSON.parse(decoded);
+                if(importedDb.users) {
+                    db = importedDb;
+                    saveData();
+                    notify("Sync Successful!", "success");
+                    location.reload();
+                }
+            } catch(e) {
+                notify("Invalid Sync Code!", "error");
+            }
+        }
+    }
+
+    // --- Original Logic ---
     function view(screen) {
         document.getElementById('landing').classList.add('hidden');
         document.getElementById('auth').classList.remove('hidden');
@@ -322,18 +331,16 @@
     function handleGetNumber() {
         const user = document.getElementById('username').value;
         const pass = document.getElementById('password').value;
-
         if(!user || !pass) return notify("Fill everything!", "error");
         
-        // Check if username exists
         for(let n in db.users) {
-            if(db.users[n].username === user) return notify("Already Took Name", "error");
+            if(db.users[n].username === user) return notify("Name Taken", "error");
         }
 
         const num = `(${rand(100,999)}) ${rand(100,999)}-${rand(100,999)}`;
         document.getElementById('gen-number').innerText = num;
         document.getElementById('num-display').classList.remove('hidden');
-        document.getElementById('auth-main-btn').innerText = "Start";
+        document.getElementById('auth-main-btn').innerText = "Confirm & Start";
         document.getElementById('auth-main-btn').onclick = () => signUp(user, pass, num);
     }
 
@@ -365,12 +372,11 @@
         location.reload();
     }
 
-    // --- App Logic ---
     function loadApp() {
         document.getElementById('auth').classList.add('hidden');
         document.getElementById('landing').classList.add('hidden');
         document.getElementById('mainApp').classList.remove('hidden');
-        document.getElementById('my-profile').innerText = `Sign Out (${currentUser})`;
+        document.getElementById('my-profile').innerText = `Logout (${currentUser})`;
         viewContacts();
     }
 
@@ -378,7 +384,6 @@
         const list = document.getElementById('contactsList');
         list.innerHTML = "";
         const contacts = db.users[currentUser].contacts;
-
         if(contacts.length === 0) {
             document.getElementById('no-contacts').classList.remove('hidden');
         } else {
@@ -386,27 +391,25 @@
             contacts.forEach(num => {
                 const cUser = db.users[num]?.username || "Unknown";
                 const div = document.createElement('div');
-                div.innerHTML = `
-                    <button class="contact-btn" onclick="openChat('${num}')">
-                        <div style="font-weight:bold; color:#00bcd4;">${num}</div>
-                        <div style="font-size:12px;">${cUser}</div>
-                    </button>
-                `;
+                div.innerHTML = `<button class="contact-btn" onclick="openChat('${num}')">
+                    <div style="font-weight:bold; color:#00bcd4;">${num}</div>
+                    <div style="font-size:12px;">${cUser}</div>
+                </button>`;
                 list.appendChild(div);
             });
         }
     }
 
     function showAddContactModal() {
-        const num = prompt("Enter Phone Number:");
+        const num = prompt("Enter the Phone Number to add:");
         if(!num) return;
-        if(num === currentUser) return notify("Don't Put Your Number In Silly!", "warning");
-        if(!db.users[num]) return notify("Not A Real Number", "error");
+        if(num === currentUser) return notify("That's your own number!", "warning");
+        if(!db.users[num]) return notify("Number does not exist", "error");
         
         if(!db.users[currentUser].contacts.includes(num)) {
             db.users[currentUser].contacts.push(num);
             saveData();
-            notify("Contact Saved!", "success");
+            notify("Added!", "success");
             viewContacts();
         }
     }
@@ -423,8 +426,6 @@
     function sendMsg() {
         const text = document.getElementById('msgInput').value;
         if(!text) return;
-        
-        // Initialize msg storage
         if(!db.users[currentUser].msgs[currentChat]) db.users[currentUser].msgs[currentChat] = [];
         if(!db.users[currentChat].msgs[currentUser]) db.users[currentChat].msgs[currentUser] = [];
 
@@ -445,27 +446,10 @@
             const div = document.createElement('div');
             div.style.textAlign = m.sender === currentUser ? "right" : "left";
             div.style.margin = "10px 0";
-            div.innerHTML = `<span style="background:${m.sender === currentUser ? '#00bcd4':'#eee'}; color:${m.sender === currentUser ? 'white':'black'}; padding:8px 12px; border-radius:15px;">${m.text}</span>`;
+            div.innerHTML = `<span style="background:${m.sender === currentUser ? '#00bcd4':'#eee'}; color:${m.sender === currentUser ? 'white':'black'}; padding:8px 12px; border-radius:15px; display:inline-block; max-width:80%; word-wrap:break-word;">${m.text}</span>`;
             box.appendChild(div);
         });
         box.scrollTop = box.scrollHeight;
-    }
-
-    function showUserOptions() {
-        const action = prompt("Type 'BLOCK' to remove or 'NAME' to change username (locally):");
-        if(action === 'BLOCK') {
-            db.users[currentUser].contacts = db.users[currentUser].contacts.filter(c => c !== currentChat);
-            saveData();
-            closeChat();
-            viewContacts();
-        } else if (action === 'NAME') {
-            const newName = prompt("New Username:");
-            if(newName) {
-                db.users[currentChat].username = newName; // Note: In a real server this would only change locally
-                saveData();
-                openChat(currentChat);
-            }
-        }
     }
 
     function closeChat() {
@@ -473,17 +457,6 @@
         document.getElementById('welcome-msg').classList.remove('hidden');
     }
 
-    function showDonateModal() {
-        const amt = prompt("How much do you want to donate?");
-        if(amt) {
-            alert(`Sending $${amt} to card 6011 4104 5391 4249\nPlease fill your card info in the next popup.`);
-            prompt("Enter Card Number:");
-            prompt("Enter Expiry / CVV:");
-            notify("Donation Sent!", "success");
-        }
-    }
-
-    // --- Helpers ---
     function notify(msg, type) {
         const div = document.createElement('div');
         div.className = `notification ${type}`;
@@ -494,9 +467,7 @@
 
     function rand(min, max) { return Math.floor(Math.random() * (max - min + 1) + min); }
 
-    // On Load
     if(currentUser) loadApp();
 </script>
-
 </body>
 </html>
