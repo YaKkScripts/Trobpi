@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balling.com</title>
+    <title>Balling.com | Cloud Connect</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -32,9 +32,8 @@
         .user-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; }
         
         .nav-item { padding: 12px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; transition: 0.2s; background: white; border: 1px solid #eee; position: relative; }
+        .nav-item:hover { border-color: var(--primary); }
         .nav-item.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .status-dot { width: 10px; height: 10px; background: #ccc; border-radius: 50%; display: inline-block; margin-right: 5px; }
-        .status-dot.online { background: var(--success); }
 
         .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #fafafa; }
         .bubble { max-width: 75%; padding: 12px 16px; border-radius: 18px; font-size: 0.95rem; }
@@ -119,16 +118,16 @@
     </div>
 
     <div id="callOverlay" class="hidden call-overlay">
-        <h2>Calling...</h2>
-        <video id="localVideo" autoplay playsinline></video>
+        <h2 id="callStatus">Calling...</h2>
+        <video id="localVideo" autoplay playsinline muted></video>
         <button class="btn" style="background:red; color:white; margin-top:20px;" onclick="endCall()">Hang Up</button>
     </div>
 
     <script>
         // --- CLOUD CONFIG ---
-        const SB_URL = "https://ubpsifoqjfzgmvhvwspv.supabase.co";
-        const SB_KEY = "sb_publishable_tW5cED71cJC5tZtXla5D-g_wv4NfVwo"; // Service role/Secret key
-        const supabase = collections = supabase.createClient(SB_URL, SB_KEY);
+        const SB_URL = "https://ubpsifoqjfzgmvhvwspv.supabase.co"; // Paste your URL
+        const SB_KEY = "sb_publishable_tW5cED71cJC5tZtXla5D-g_wv4NfVwo"; // Paste your Anon Key
+        const supabase = supabase.createClient(SB_URL, SB_KEY);
 
         let db = { users: {}, chats: {}, presence: {} };
         let currentUser = JSON.parse(localStorage.getItem('balling_session'));
@@ -138,11 +137,13 @@
         // --- CLOUD DATA FUNCTIONS ---
         async function loadCloudDB() {
             const { data, error } = await supabase.from('balling_data').select('content').eq('id', 'main_db').single();
-            if (data) {
+            if (data && data.content) {
                 db = data.content;
-                renderContacts();
-                if(activeId) renderMessages();
-                checkPresence();
+                if(currentUser) {
+                    renderContacts();
+                    if(activeId) renderMessages();
+                    checkPresence();
+                }
             }
         }
 
@@ -156,25 +157,33 @@
         function toggleAuthMode() {
             isLoginMode = !isLoginMode;
             document.getElementById('primaryAuthBtn').innerText = isLoginMode ? "Login" : "Create Account";
-            document.getElementById('authToggleLink').innerText = isLoginMode ? "Need an account? Sign Up" : "Already have an account? Login";
+            document.getElementById('idDisplay').classList.add('hidden');
         }
 
         async function processAuth() {
             const user = document.getElementById('usernameField').value.trim();
             const pass = document.getElementById('passwordField').value.trim();
-            if(!user || !pass) return alert("Missing fields");
+            if(!user || !pass) return alert("Please enter username and password");
 
             await loadCloudDB();
 
             if(isLoginMode) {
+                // Login Logic
                 const id = Object.keys(db.users).find(k => db.users[k].user === user && db.users[k].pass === pass);
-                if(id) loginUser(id); else alert("Invalid credentials");
+                if(id) {
+                    loginUser(id);
+                } else {
+                    alert("Account not found or password incorrect.");
+                }
             } else {
+                // Sign Up Logic
                 const id = `(${Math.floor(Math.random()*900)+100}) ${Math.floor(Math.random()*900)+100}-${Math.floor(Math.random()*900)+100}`;
+                if (!db.users) db.users = {};
                 db.users[id] = { user, pass, friends: {}, lastSeen: Date.now() };
+                
                 document.getElementById('generatedId').innerText = id;
                 document.getElementById('idDisplay').classList.remove('hidden');
-                document.getElementById('primaryAuthBtn').innerText = "Confirm & Enter";
+                document.getElementById('primaryAuthBtn').innerText = "Enter App";
                 document.getElementById('primaryAuthBtn').onclick = () => loginUser(id);
                 await saveCloudDB();
             }
@@ -183,7 +192,12 @@
         function loginUser(id) {
             currentUser = { id, name: db.users[id].user };
             localStorage.setItem('balling_session', JSON.stringify(currentUser));
-            location.reload();
+            document.getElementById('authView').classList.add('hidden');
+            document.getElementById('appView').classList.remove('hidden');
+            document.getElementById('appHeader').classList.remove('hidden');
+            document.getElementById('myName').innerText = currentUser.name;
+            document.getElementById('myId').innerText = currentUser.id;
+            loadCloudDB();
         }
 
         function signOut() {
@@ -198,9 +212,10 @@
             if(!text || !activeId) return;
 
             const chan = [currentUser.id, activeId].sort().join('_');
+            if(!db.chats) db.chats = {};
             if(!db.chats[chan]) db.chats[chan] = [];
             
-            db.chats[chan].push({ sender: currentUser.id, name: currentUser.name, text, time: Date.now() });
+            db.chats[chan].push({ sender: currentUser.id, text, time: Date.now() });
             input.value = "";
             renderMessages();
             await saveCloudDB();
@@ -209,30 +224,32 @@
         function renderMessages() {
             const box = document.getElementById('messageList');
             const chan = [currentUser.id, activeId].sort().join('_');
-            box.innerHTML = "";
-            if(db.chats[chan]) {
-                db.chats[chan].forEach(m => {
-                    const b = document.createElement('div');
-                    b.className = `bubble ${m.sender === currentUser.id ? 'me' : 'them'}`;
-                    b.innerText = m.text;
-                    box.appendChild(b);
-                });
-            }
+            if(!db.chats || !db.chats[chan]) return;
+
+            let html = "";
+            db.chats[chan].forEach(m => {
+                html += `<div class="bubble ${m.sender === currentUser.id ? 'me' : 'them'}">${m.text}</div>`;
+            });
+            box.innerHTML = html;
             box.scrollTop = box.scrollHeight;
         }
 
         // --- CONTACTS ---
         async function addContact() {
             const id = document.getElementById('searchId').value.trim();
-            if(!db.users[id]) return alert("ID not found");
+            if(!db.users[id]) return alert("This ID does not exist!");
+            if(id === currentUser.id) return alert("You cannot add yourself.");
+
             db.users[currentUser.id].friends[id] = db.users[id].user;
             await saveCloudDB();
+            alert("Added!");
             setNav('contacts');
         }
 
         function openChat(id) {
             activeId = id;
             document.getElementById('chatPlaceholder').classList.add('hidden');
+            document.getElementById('addView').classList.add('hidden');
             document.getElementById('chatView').classList.remove('hidden');
             document.getElementById('chatName').innerText = db.users[id].user;
             renderMessages();
@@ -240,25 +257,26 @@
 
         function renderContacts() {
             const container = document.getElementById('contactContainer');
-            container.innerHTML = "";
             const friends = db.users[currentUser.id]?.friends || {};
+            let html = "";
             Object.keys(friends).forEach(fId => {
-                const div = document.createElement('div');
-                div.className = `nav-item ${activeId === fId ? 'active' : ''}`;
-                div.innerHTML = `<strong>${friends[fId]}</strong><br><small>${fId}</small>`;
-                div.onclick = () => openChat(fId);
-                container.appendChild(div);
+                html += `<div class="nav-item ${activeId === fId ? 'active' : ''}" onclick="openChat('${fId}')">
+                    <strong>${friends[fId]}</strong><br><small>${fId}</small>
+                </div>`;
             });
+            container.innerHTML = html;
         }
 
         function setNav(v) {
             document.getElementById('chatPlaceholder').classList.toggle('hidden', v !== 'contacts');
             document.getElementById('addView').classList.toggle('hidden', v !== 'add');
             document.getElementById('chatView').classList.add('hidden');
+            activeId = null;
         }
 
-        // --- REALTIME POLLING ---
+        // --- CALLING (SIMULATED) ---
         function checkPresence() {
+            if(!db.presence) db.presence = {};
             const call = db.presence[currentUser.id];
             if(call && call.type === 'incoming') {
                 if(confirm(`Incoming call from ${call.name}!`)) {
@@ -271,30 +289,34 @@
 
         async function startCall(isIncoming = false) {
             document.getElementById('callOverlay').classList.remove('hidden');
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            document.getElementById('localVideo').srcObject = stream;
-            if(!isIncoming) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                document.getElementById('localVideo').srcObject = stream;
+            } catch(e) {
+                document.getElementById('callStatus').innerText = "Camera not found - Audio only";
+            }
+            if(!isIncoming && activeId) {
+                if(!db.presence) db.presence = {};
                 db.presence[activeId] = { type: 'incoming', from: currentUser.id, name: currentUser.name };
                 saveCloudDB();
             }
         }
 
         function endCall() {
-            location.reload();
+            document.getElementById('callOverlay').classList.add('hidden');
+            const video = document.getElementById('localVideo');
+            if(video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
         }
 
-        // Init
+        // --- INIT ---
         if(currentUser) {
-            document.getElementById('authView').classList.add('hidden');
-            document.getElementById('appView').classList.remove('hidden');
-            document.getElementById('appHeader').classList.remove('hidden');
-            document.getElementById('myName').innerText = currentUser.name;
-            document.getElementById('myId').innerText = currentUser.id;
-            
-            // Start sync loop
-            loadCloudDB();
-            setInterval(loadCloudDB, 4000); // Check for new messages every 4 seconds
+            loginUser(currentUser.id);
         }
+        
+        loadCloudDB();
+        setInterval(loadCloudDB, 3000); // Polling every 3 seconds for updates
     </script>
 </body>
 </html>
