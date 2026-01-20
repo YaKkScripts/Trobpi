@@ -3,100 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balling.com | Connected</title>
+    <title>Balling.com | Universal Cloud Connect</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #00bcd4;
             --primary-dark: #0097a7;
-            --bg: #0a0c10;
-            --glass-bg: rgba(255, 255, 255, 0.95);
+            --bg: #f0f4f8;
             --white: #ffffff;
             --text: #333;
             --error: #ff5252;
             --success: #4caf50;
+            --gray: #999;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
-        
-        /* --- STARTUP ANIMATION --- */
-        #startup {
-            position: fixed; inset: 0; background: #000; z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 1s ease-in-out;
-        }
-        .b-logo {
-            font-size: 5rem; font-weight: 800; color: var(--primary);
-            animation: pulse 1.5s infinite ease-in-out;
-        }
-        .brand-name {
-            color: white; margin-top: 10px; font-size: 1.2rem; letter-spacing: 2px;
-            opacity: 0; animation: fadeIn 1s forwards 0.5s;
-        }
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } }
-        @keyframes fadeIn { to { opacity: 1; } }
-
-        /* --- UI LAYOUT --- */
         .hidden { display: none !important; }
-        .container { max-width: 1200px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; padding: 10px; opacity: 0; transition: opacity 0.5s; }
-        .glass { background: var(--glass-bg); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
-
-        .app-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; margin-bottom: 10px; color: white; background: rgba(0,0,0,0.2); }
+        
+        .container { max-width: 1200px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; padding: 10px; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.3); }
+        
+        .app-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; margin-bottom: 10px; }
         .app-grid { display: grid; grid-template-columns: 320px 1fr; gap: 15px; flex: 1; height: 82vh; }
         
         /* Sidebar */
-        .sidebar { display: flex; flex-direction: column; padding: 15px; }
-        .user-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 20px; border-radius: 15px; margin-bottom: 15px; }
-        .nav-item { padding: 12px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; transition: 0.2s; background: white; border: 1px solid #ddd; }
+        .sidebar { display: flex; flex-direction: column; padding: 15px; overflow: hidden; }
+        .user-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; }
+        .contact-list { overflow-y: auto; flex: 1; }
+        
+        .nav-item { padding: 12px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; transition: 0.2s; background: white; border: 1px solid #eee; position: relative; }
         .nav-item.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .status-dot { width: 10px; height: 10px; background: #ccc; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .status-dot.online { background: var(--success); box-shadow: 0 0 5px var(--success); }
 
-        /* Chat Area */
-        .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #f9f9f9; }
-        .bubble { max-width: 70%; padding: 12px; border-radius: 15px; font-size: 0.95rem; }
+        /* Chat */
+        .main-view { display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative; }
+        .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #fafafa; }
+        .bubble { max-width: 75%; padding: 12px 16px; border-radius: 18px; font-size: 0.95rem; line-height: 1.4; }
         .bubble.me { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 2px; }
-        .bubble.them { align-self: flex-start; background: #eee; border-bottom-left-radius: 2px; }
+        .bubble.them { align-self: flex-start; background: #eee; color: #222; border-bottom-left-radius: 2px; }
 
-        .input-area { padding: 15px; display: flex; gap: 10px; background: white; border-top: 1px solid #eee; border-radius: 0 0 20px 20px; }
-        input { flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid #ddd; outline: none; }
+        .input-area { padding: 15px; display: flex; gap: 10px; background: white; border-top: 1px solid #eee; }
+        input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid #ddd; outline: none; }
         .btn { padding: 10px 20px; border-radius: 25px; border: none; font-weight: 600; cursor: pointer; }
         .btn-main { background: var(--primary); color: white; }
         
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; background: #ccc; }
-        .status-dot.online { background: var(--success); box-shadow: 0 0 5px var(--success); }
-
-        .call-overlay { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
-        video { width: 80%; max-width: 400px; border-radius: 20px; border: 2px solid var(--primary); margin-bottom: 20px; }
+        /* Loading Overlay */
+        #loader { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; }
     </style>
 </head>
 <body>
 
-    <div id="startup">
-        <div class="b-logo">B</div>
-        <div class="brand-name">BALLING.WEBSITE</div>
+    <div id="loader">
+        <h1 style="color: var(--primary)">Balling.com</h1>
+        <p>Connecting to Cloud...</p>
     </div>
 
-    <div class="container" id="mainApp">
+    <div class="container">
         <header id="appHeader" class="glass app-header hidden">
-            <h2>Balling.com</h2>
-            <div id="globalStatus" style="color: var(--success); font-size: 0.8rem;">● SYNCED TO CLOUD</div>
+            <h2 style="color: var(--primary)">Balling</h2>
+            <div id="syncIndicator" style="font-size: 0.7rem; color: var(--success)">● Cloud Synced</div>
         </header>
 
-        <div id="authView" class="glass" style="max-width: 400px; margin: 10vh auto; padding: 40px; text-align: center;">
-            <h1 style="color: var(--primary); margin-bottom: 10px;">Balling</h1>
-            <p id="authSubtitle" style="margin-bottom: 20px;">Secure Messaging</p>
-            
-            <input type="text" id="usernameField" placeholder="Username" style="width: 100%; margin-bottom: 10px;">
-            <input type="password" id="passwordField" placeholder="Password" style="width: 100%; margin-bottom: 10px;">
-            
-            <div id="idDisplay" class="hidden" style="background: #e0f7fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-                <small>Your Universal Balling ID:</small><br>
-                <strong id="generatedId" style="color: var(--primary-dark);"></strong>
-            </div>
+        <div id="authView" class="hidden">
+            <div class="glass" style="max-width: 400px; margin: 80px auto; padding: 40px; text-align: center;">
+                <h1 style="color: var(--primary)">Balling.com</h1>
+                <p id="authSubtitle">Sign up to start balling.</p><br>
+                <input type="text" id="usernameField" placeholder="Username" style="width: 100%; margin-bottom: 10px;">
+                <input type="password" id="passwordField" placeholder="Password" style="width: 100%; margin-bottom: 10px;">
+                
+                <div id="idDisplay" class="hidden" style="background: #e0f7fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                    <small>Your Universal Balling ID:</small><br>
+                    <strong id="generatedId" style="color: var(--primary-dark);"></strong>
+                </div>
 
-            <button class="btn btn-main" id="primaryAuthBtn" style="width: 100%;" onclick="handleAuth()">Create Account</button>
-            <p style="margin-top: 15px; font-size: 0.9rem;">
-                <a href="#" id="authToggleLink" onclick="toggleAuth()" style="color: var(--primary);">Already have an account? Login</a>
-            </p>
+                <button class="btn btn-main" id="primaryAuthBtn" style="width: 100%;" onclick="handleAuth()">Continue</button>
+                <p style="margin-top: 15px; font-size: 0.9rem;">
+                    <a href="#" id="authToggleLink" onclick="toggleAuth()">Already have an account? Login</a>
+                </p>
+            </div>
         </div>
 
         <div id="appView" class="hidden app-grid">
@@ -104,261 +90,222 @@
                 <div class="user-card">
                     <h3 id="myName">User</h3>
                     <small id="myId">ID</small>
-                    <button class="btn" style="background:rgba(255,255,255,0.2); width:100%; margin-top:10px; color:white; font-size:0.7rem;" onclick="logout()">Logout</button>
+                    <button class="btn" style="background:rgba(255,255,255,0.2); width:100%; margin-top:10px; color:white;" onclick="signOut()">Logout</button>
                 </div>
                 <div style="display:flex; gap:5px; margin-bottom:10px;">
-                    <button class="btn btn-main" style="flex:1" onclick="showView('contacts')">Chats</button>
-                    <button class="btn btn-main" style="flex:1; background:#555;" onclick="showView('add')">Add</button>
+                    <button class="btn btn-main" style="flex:1" onclick="setNav('contacts')">Chats</button>
+                    <button class="btn btn-ghost" style="flex:1" onclick="setNav('add')">Add</button>
                 </div>
-                <div id="contactList" class="contact-list" style="overflow-y:auto;"></div>
+                <div class="contact-list" id="contactContainer"></div>
             </aside>
 
-            <main class="main-view glass" style="display:flex; flex-direction:column; overflow:hidden;">
-                <div id="chatDefault" style="text-align:center; padding-top:20vh; color:#999;">
-                    <h2>No Chat Active</h2>
-                    <p>Select a friend to start balling.</p>
+            <main class="main-view glass">
+                <div id="chatPlaceholder" style="text-align: center; margin-top: 25%; color: var(--gray);">
+                    <h2>Cloud Connected</h2>
+                    <p>Select a friend to start texting.</p>
                 </div>
 
-                <div id="chatActive" class="hidden" style="display:flex; flex-direction:column; height:100%;">
-                    <div style="padding:15px; background:white; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-                        <h3 id="activeChatName">Friend</h3>
+                <div id="chatView" class="hidden" style="height:100%; display:flex; flex-direction:column;">
+                    <div style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; background:white;">
+                        <h3 id="chatName">Friend</h3>
                         <div style="display:flex; gap:10px;">
-                            <button class="btn btn-main" onclick="initiateCall()">📞 Call</button>
-                            <button class="btn" id="blockBtn" style="background:#eee;" onclick="toggleBlock()">Block</button>
+                            <button class="btn btn-main" onclick="startCall()">📞 Call</button>
+                            <button class="btn btn-ghost" id="blockBtn" onclick="toggleBlock()">Block</button>
                         </div>
                     </div>
-                    <div id="messageBox" class="chat-box"></div>
-                    <div id="inputBar" class="input-area">
-                        <input type="text" id="msgInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter')sendMessage()">
-                        <button class="btn btn-main" onclick="sendMessage()">Send</button>
+                    <div class="chat-box" id="messageList"></div>
+                    <div class="input-area" id="inputBar">
+                        <input type="text" id="chatInput" placeholder="Message..." onkeypress="if(event.key==='Enter')sendMsg()">
+                        <button class="btn btn-main" onclick="sendMsg()">Send</button>
                     </div>
                 </div>
 
                 <div id="addView" class="hidden" style="padding:40px;">
-                    <h2>Add Friend</h2>
-                    <input type="text" id="friendIdInput" placeholder="(XXX) XXX-XXX" style="width:100%; margin-top:20px; font-size:1.2rem;">
-                    <button class="btn btn-main" style="width:100%; margin-top:15px;" onclick="addFriend()">Add by ID</button>
+                    <h2>Find Friend by ID</h2>
+                    <input type="text" id="searchId" placeholder="(XXX) XXX-XXX" style="width:100%; margin-top:20px; font-size:1.5rem;">
+                    <button class="btn btn-main" style="width:100%; margin-top:20px;" onclick="addContact()">Connect</button>
                 </div>
             </main>
         </div>
     </div>
 
-    <div id="callOverlay" class="hidden call-overlay">
-        <h2>SECURE CALL</h2>
-        <video id="webcam" autoplay playsinline></video>
-        <button class="btn" style="background:var(--error); color:white; padding:15px 50px;" onclick="endCall()">End Call</button>
-    </div>
-
     <script>
-        // --- GLOBAL CLOUD DATA SIMULATION ---
-        // This simulates a global database using your API key context
-        let cloud = JSON.parse(localStorage.getItem('balling_global')) || { users: {}, chats: {}, calls: {} };
-        let session = JSON.parse(localStorage.getItem('balling_session')) || null;
-        let activeChatId = null;
+        // --- SUPABASE CONFIGURATION ---
+        // REPLACE 'YOUR_SUPABASE_URL' WITH YOUR ACTUAL PROJECT URL
+        const SUPABASE_URL = 'https://ubpsifoqjfzgmvhvwspv.supabase.co'; 
+        const SUPABASE_KEY = 'sb_secret_3qhfwLrkFlac3Gef-1lYoA_JxWNvQu8';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentUser = null;
+        let activeId = null;
         let isLoginMode = false;
 
-        function sync() {
-            localStorage.setItem('balling_global', JSON.stringify(cloud));
-            // In a real production environment, you would use:
-            // fetch('https://api.balling.website/sync', { method: 'POST', body: JSON.stringify(cloud), headers: {'Authorization': 'sb_secret_3qhfwLrk...'} });
+        // --- CORE INITIALIZATION ---
+        async function init() {
+            const session = localStorage.getItem('balling_session_id');
+            if (session) {
+                const { data, error } = await supabase.from('users').select('*').eq('id', session).single();
+                if (data) {
+                    currentUser = data;
+                    showApp();
+                } else {
+                    showAuth();
+                }
+            } else {
+                showAuth();
+            }
+            document.getElementById('loader').classList.add('hidden');
         }
 
-        // --- STARTUP LOGIC ---
-        window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('startup').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('startup').classList.add('hidden');
-                    document.getElementById('mainApp').style.opacity = '1';
-                    if(session) loadApp();
-                }, 1000);
-            }, 2500);
-        };
-
-        // --- AUTH ---
+        // --- AUTH FUNCTIONS ---
         function toggleAuth() {
             isLoginMode = !isLoginMode;
-            document.getElementById('authSubtitle').innerText = isLoginMode ? "Login to your account" : "Sign up to start balling";
+            document.getElementById('authSubtitle').innerText = isLoginMode ? "Login to access your messages." : "Sign up to start balling.";
             document.getElementById('primaryAuthBtn').innerText = isLoginMode ? "Login" : "Create Account";
-            document.getElementById('authToggleLink').innerText = isLoginMode ? "Need an account? Sign Up" : "Already have an account? Login";
         }
 
-        function handleAuth() {
-            const u = document.getElementById('usernameField').value.trim();
-            const p = document.getElementById('passwordField').value.trim();
-            if(!u || !p) return alert("Enter credentials");
+        async function handleAuth() {
+            const user = document.getElementById('usernameField').value.trim();
+            const pass = document.getElementById('passwordField').value.trim();
 
-            if(isLoginMode) {
-                const id = Object.keys(cloud.users).find(k => cloud.users[k].user === u && cloud.users[k].pass === p);
-                if(id) login(id); else alert("Wrong credentials");
+            if (isLoginMode) {
+                const { data, error } = await supabase.from('users')
+                    .select('*').eq('username', user).eq('password', pass).single();
+                if (data) loginSuccess(data);
+                else alert("Account not found or password wrong.");
             } else {
-                const id = `(${Math.floor(Math.random()*899)+100}) ${Math.floor(Math.random()*899)+100}-${Math.floor(Math.random()*899)+100}`;
-                cloud.users[id] = { user: u, pass: p, friends: {}, blocked: [], lastActive: Date.now() };
-                document.getElementById('generatedId').innerText = id;
-                document.getElementById('idDisplay').classList.remove('hidden');
-                document.getElementById('primaryAuthBtn').innerText = "Enter Balling";
-                document.getElementById('primaryAuthBtn').onclick = () => login(id);
-                sync();
+                const newId = `(${Math.floor(Math.random()*900)+100}) ${Math.floor(Math.random()*900)+100}-${Math.floor(Math.random()*900)+100}`;
+                const { data, error } = await supabase.from('users').insert([
+                    { id: newId, username: user, password: pass, friends: [], blocked: [], last_seen: new Date() }
+                ]).select().single();
+                
+                if (data) {
+                    document.getElementById('generatedId').innerText = data.id;
+                    document.getElementById('idDisplay').classList.remove('hidden');
+                    document.getElementById('primaryAuthBtn').innerText = "Start Balling";
+                    document.getElementById('primaryAuthBtn').onclick = () => loginSuccess(data);
+                }
             }
         }
 
-        function login(id) {
-            session = { id: id, name: cloud.users[id].user };
-            localStorage.setItem('balling_session', JSON.stringify(session));
-            Notification.requestPermission();
+        function loginSuccess(user) {
+            localStorage.setItem('balling_session_id', user.id);
             location.reload();
         }
 
-        function logout() {
-            localStorage.removeItem('balling_session');
+        function signOut() {
+            localStorage.removeItem('balling_session_id');
             location.reload();
         }
 
-        // --- CHAT LOGIC ---
-        function showView(view) {
-            document.getElementById('chatDefault').classList.toggle('hidden', view !== 'contacts');
-            document.getElementById('addView').classList.toggle('hidden', view !== 'add');
-            document.getElementById('chatActive').classList.add('hidden');
+        // --- MESSAGING ---
+        async function sendMsg() {
+            const text = document.getElementById('chatInput').value.trim();
+            if (!text || !activeId) return;
+
+            const room = [currentUser.id, activeId].sort().join('_');
+            await supabase.from('messages').insert([
+                { room_id: room, sender_id: currentUser.id, text: text, sender_name: currentUser.username }
+            ]);
+
+            document.getElementById('chatInput').value = "";
+            loadMessages();
         }
 
-        function addFriend() {
-            const id = document.getElementById('friendIdInput').value.trim();
-            if(!cloud.users[id] || id === session.id) return alert("ID not found");
-            cloud.users[session.id].friends[id] = cloud.users[id].user;
-            sync();
-            openChat(id);
-        }
-
-        function openChat(id) {
-            activeChatId = id;
-            showView('contacts');
-            document.getElementById('chatDefault').classList.add('hidden');
-            document.getElementById('chatActive').classList.remove('hidden');
-            document.getElementById('activeChatName').innerText = cloud.users[session.id].friends[id];
+        async function loadMessages() {
+            const room = [currentUser.id, activeId].sort().join('_');
+            const { data } = await supabase.from('messages')
+                .select('*').eq('room_id', room).order('created_at', { ascending: true });
             
-            const isBlocked = cloud.users[session.id].blocked.includes(id);
-            document.getElementById('inputBar').style.display = isBlocked ? 'none' : 'flex';
-            document.getElementById('blockBtn').innerText = isBlocked ? 'Unblock' : 'Block';
-            
-            renderMessages();
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('msgInput');
-            if(!input.value.trim()) return;
-
-            const channelId = [session.id, activeChatId].sort().join('::');
-            if(!cloud.chats[channelId]) cloud.chats[channelId] = [];
-
-            cloud.chats[channelId].push({
-                from: session.id,
-                name: session.name,
-                text: input.value,
-                time: Date.now()
-            });
-
-            input.value = "";
-            sync();
-            renderMessages();
-        }
-
-        function renderMessages() {
-            const box = document.getElementById('messageBox');
-            const channelId = [session.id, activeChatId].sort().join('::');
+            const box = document.getElementById('messageList');
             box.innerHTML = "";
-            
-            if(cloud.chats[channelId]) {
-                cloud.chats[channelId].forEach(m => {
-                    const div = document.createElement('div');
-                    div.className = `bubble ${m.from === session.id ? 'me' : 'them'}`;
-                    div.innerText = m.text;
-                    box.appendChild(div);
-                });
-            }
+            data?.forEach(m => {
+                const b = document.createElement('div');
+                b.className = `bubble ${m.sender_id === currentUser.id ? 'me' : 'them'}`;
+                b.innerText = m.text;
+                box.appendChild(b);
+            });
             box.scrollTop = box.scrollHeight;
         }
 
+        // --- REAL-TIME SUBSCRIPTION ---
+        function subscribeToEvents() {
+            // Listen for new messages globally
+            supabase.channel('public:messages')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+                const msg = payload.new;
+                if (msg.room_id.includes(currentUser.id)) {
+                    if (activeId && msg.room_id.includes(activeId)) {
+                        loadMessages();
+                    } else {
+                        showNotification(msg.sender_name, msg.text);
+                    }
+                }
+            }).subscribe();
+        }
+
+        function showNotification(sender, text) {
+            if (Notification.permission === "granted") {
+                new Notification(`Balling: ${sender}`, { body: text });
+            }
+        }
+
+        // --- UI HELPERS ---
+        function showApp() {
+            document.getElementById('authView').classList.add('hidden');
+            document.getElementById('appView').classList.remove('hidden');
+            document.getElementById('appHeader').classList.remove('hidden');
+            document.getElementById('myName').innerText = currentUser.username;
+            document.getElementById('myId').innerText = currentUser.id;
+            renderContacts();
+            subscribeToEvents();
+            Notification.requestPermission();
+        }
+
+        function showAuth() {
+            document.getElementById('authView').classList.remove('hidden');
+        }
+
+        async function addContact() {
+            const id = document.getElementById('searchId').value.trim();
+            const { data } = await supabase.from('users').select('*').eq('id', id).single();
+            if (data) {
+                const newFriends = [...currentUser.friends, {id: data.id, name: data.username}];
+                await supabase.from('users').update({ friends: newFriends }).eq('id', currentUser.id);
+                currentUser.friends = newFriends;
+                renderContacts();
+                setNav('contacts');
+            } else {
+                alert("User not found!");
+            }
+        }
+
         function renderContacts() {
-            const list = document.getElementById('contactList');
-            list.innerHTML = "";
-            const friends = cloud.users[session.id].friends;
-            
-            Object.keys(friends).forEach(fid => {
-                const online = (Date.now() - cloud.users[fid].lastActive) < 10000;
+            const container = document.getElementById('contactContainer');
+            container.innerHTML = "";
+            currentUser.friends.forEach(f => {
                 const div = document.createElement('div');
-                div.className = `nav-item ${activeChatId === fid ? 'active' : ''}`;
-                div.innerHTML = `<span class="status-dot ${online ? 'online' : ''}"></span> ${friends[fid]}`;
-                div.onclick = () => openChat(fid);
-                list.appendChild(div);
+                div.className = `nav-item ${activeId === f.id ? 'active' : ''}`;
+                div.innerHTML = `<strong>${f.name}</strong><br><small>${f.id}</small>`;
+                div.onclick = () => {
+                    activeId = f.id;
+                    document.getElementById('chatPlaceholder').classList.add('hidden');
+                    document.getElementById('chatView').classList.remove('hidden');
+                    document.getElementById('chatName').innerText = f.name;
+                    loadMessages();
+                    renderContacts();
+                };
+                container.appendChild(div);
             });
         }
 
-        function toggleBlock() {
-            const blocked = cloud.users[session.id].blocked;
-            if(blocked.includes(activeChatId)) {
-                cloud.users[session.id].blocked = blocked.filter(i => i !== activeChatId);
-            } else {
-                blocked.push(activeChatId);
-            }
-            sync();
-            openChat(activeChatId);
+        function setNav(v) {
+            document.getElementById('chatPlaceholder').classList.toggle('hidden', v !== 'contacts');
+            document.getElementById('addView').classList.toggle('hidden', v !== 'add');
+            document.getElementById('chatView').classList.add('hidden');
         }
 
-        // --- CALLS ---
-        async function initiateCall() {
-            cloud.calls[activeChatId] = { from: session.id, name: session.name };
-            sync();
-            document.getElementById('callOverlay').classList.remove('hidden');
-            const s = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
-            document.getElementById('webcam').srcObject = s;
-        }
-
-        function endCall() {
-            document.getElementById('callOverlay').classList.add('hidden');
-            const tracks = document.getElementById('webcam').srcObject?.getTracks();
-            tracks?.forEach(t => t.stop());
-            delete cloud.calls[session.id];
-            sync();
-        }
-
-        // --- APP ENGINE ---
-        function loadApp() {
-            document.getElementById('authView').classList.add('hidden');
-            document.getElementById('appHeader').classList.remove('hidden');
-            document.getElementById('appView').classList.remove('hidden');
-            document.getElementById('myName').innerText = session.name;
-            document.getElementById('myId').innerText = session.id;
-            
-            // Loop for real-time updates
-            setInterval(() => {
-                cloud = JSON.parse(localStorage.getItem('balling_global')) || cloud;
-                cloud.users[session.id].lastActive = Date.now();
-                
-                // Notifications
-                const channels = Object.keys(cloud.chats).filter(c => c.includes(session.id));
-                channels.forEach(c => {
-                    const last = cloud.chats[c][cloud.chats[c].length - 1];
-                    if(last && last.from !== session.id && last.time > (Date.now() - 2000)) {
-                        if(activeChatId !== last.from) {
-                            new Notification(`Balling: ${last.name}`, {body: last.text});
-                        }
-                    }
-                });
-
-                // Incoming Calls
-                if(cloud.calls[session.id]) {
-                    if(confirm(`Incoming Call from ${cloud.calls[session.id].name}. Accept?`)) {
-                        activeChatId = cloud.calls[session.id].from;
-                        initiateCall();
-                    }
-                    delete cloud.calls[session.id];
-                }
-
-                renderContacts();
-                if(activeChatId) renderMessages();
-                sync();
-            }, 2000);
-        }
+        init();
     </script>
 </body>
 </html>
