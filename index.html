@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balling.com | Universal Cloud Connect</title>
+    <title>Balling.com | Cloud Connect</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -27,20 +27,17 @@
         .app-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; margin-bottom: 10px; }
         .app-grid { display: grid; grid-template-columns: 320px 1fr; gap: 15px; flex: 1; height: 82vh; }
         
-        /* Sidebar */
         .sidebar { display: flex; flex-direction: column; padding: 15px; overflow: hidden; }
+        .contact-list { overflow-y: auto; flex: 1; margin-top: 10px; }
         .user-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; }
-        .contact-list { overflow-y: auto; flex: 1; }
         
         .nav-item { padding: 12px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; transition: 0.2s; background: white; border: 1px solid #eee; position: relative; }
         .nav-item.active { background: var(--primary); color: white; border-color: var(--primary); }
         .status-dot { width: 10px; height: 10px; background: #ccc; border-radius: 50%; display: inline-block; margin-right: 5px; }
-        .status-dot.online { background: var(--success); box-shadow: 0 0 5px var(--success); }
+        .status-dot.online { background: var(--success); }
 
-        /* Chat */
-        .main-view { display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative; }
         .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #fafafa; }
-        .bubble { max-width: 75%; padding: 12px 16px; border-radius: 18px; font-size: 0.95rem; line-height: 1.4; }
+        .bubble { max-width: 75%; padding: 12px 16px; border-radius: 18px; font-size: 0.95rem; }
         .bubble.me { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 2px; }
         .bubble.them { align-self: flex-start; background: #eee; color: #222; border-bottom-left-radius: 2px; }
 
@@ -49,39 +46,35 @@
         .btn { padding: 10px 20px; border-radius: 25px; border: none; font-weight: 600; cursor: pointer; }
         .btn-main { background: var(--primary); color: white; }
         
-        /* Loading Overlay */
-        #loader { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .call-overlay { position: fixed; inset: 0; background: #111; z-index: 3000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        video { width: 90%; max-width: 500px; border-radius: 20px; background: #222; }
     </style>
 </head>
 <body>
 
-    <div id="loader">
-        <h1 style="color: var(--primary)">Balling.com</h1>
-        <p>Connecting to Cloud...</p>
-    </div>
-
     <div class="container">
         <header id="appHeader" class="glass app-header hidden">
-            <h2 style="color: var(--primary)">Balling</h2>
-            <div id="syncIndicator" style="font-size: 0.7rem; color: var(--success)">● Cloud Synced</div>
+            <h2 style="color: var(--primary)">Balling Cloud</h2>
+            <div id="cloudStatus" style="font-size: 0.7rem; color: var(--success);">☁️ SYNCED</div>
         </header>
 
-        <div id="authView" class="hidden">
+        <div id="authView">
             <div class="glass" style="max-width: 400px; margin: 80px auto; padding: 40px; text-align: center;">
-                <h1 style="color: var(--primary)">Balling.com</h1>
-                <p id="authSubtitle">Sign up to start balling.</p><br>
-                <input type="text" id="usernameField" placeholder="Username" style="width: 100%; margin-bottom: 10px;">
-                <input type="password" id="passwordField" placeholder="Password" style="width: 100%; margin-bottom: 10px;">
-                
-                <div id="idDisplay" class="hidden" style="background: #e0f7fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-                    <small>Your Universal Balling ID:</small><br>
-                    <strong id="generatedId" style="color: var(--primary-dark);"></strong>
-                </div>
+                <h1 style="color: var(--primary); margin-bottom: 20px;">Balling.com</h1>
+                <div id="authInputs">
+                    <input type="text" id="usernameField" placeholder="Username" style="width: 100%; margin-bottom: 10px;">
+                    <input type="password" id="passwordField" placeholder="Password" style="width: 100%; margin-bottom: 10px;">
+                    
+                    <div id="idDisplay" class="hidden" style="background: #e0f7fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                        <small>Your Universal Balling ID:</small><br>
+                        <strong id="generatedId" style="color: var(--primary-dark);"></strong>
+                    </div>
 
-                <button class="btn btn-main" id="primaryAuthBtn" style="width: 100%;" onclick="handleAuth()">Continue</button>
-                <p style="margin-top: 15px; font-size: 0.9rem;">
-                    <a href="#" id="authToggleLink" onclick="toggleAuth()">Already have an account? Login</a>
-                </p>
+                    <button class="btn btn-main" id="primaryAuthBtn" style="width: 100%;" onclick="processAuth()">Create Account</button>
+                    <p style="margin-top: 15px; font-size: 0.9rem;">
+                        <a href="#" id="authToggleLink" onclick="toggleAuthMode()">Already have an account? Login</a>
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -92,209 +85,168 @@
                     <small id="myId">ID</small>
                     <button class="btn" style="background:rgba(255,255,255,0.2); width:100%; margin-top:10px; color:white;" onclick="signOut()">Logout</button>
                 </div>
-                <div style="display:flex; gap:5px; margin-bottom:10px;">
-                    <button class="btn btn-main" style="flex:1" onclick="setNav('contacts')">Chats</button>
-                    <button class="btn btn-ghost" style="flex:1" onclick="setNav('add')">Add</button>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn btn-main" style="flex:1;" onclick="setNav('contacts')">Chats</button>
+                    <button class="btn" style="flex:1; background:#eee;" onclick="setNav('add')">Add</button>
                 </div>
                 <div class="contact-list" id="contactContainer"></div>
             </aside>
 
             <main class="main-view glass">
                 <div id="chatPlaceholder" style="text-align: center; margin-top: 25%; color: var(--gray);">
-                    <h2>Cloud Connected</h2>
-                    <p>Select a friend to start texting.</p>
+                    <h2>Select a conversation</h2>
                 </div>
 
                 <div id="chatView" class="hidden" style="height:100%; display:flex; flex-direction:column;">
-                    <div style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; background:white;">
+                    <div style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
                         <h3 id="chatName">Friend</h3>
-                        <div style="display:flex; gap:10px;">
-                            <button class="btn btn-main" onclick="startCall()">📞 Call</button>
-                            <button class="btn btn-ghost" id="blockBtn" onclick="toggleBlock()">Block</button>
-                        </div>
+                        <button class="btn btn-main" onclick="startCall()">📞 Call</button>
                     </div>
                     <div class="chat-box" id="messageList"></div>
-                    <div class="input-area" id="inputBar">
+                    <div class="input-area">
                         <input type="text" id="chatInput" placeholder="Message..." onkeypress="if(event.key==='Enter')sendMsg()">
                         <button class="btn btn-main" onclick="sendMsg()">Send</button>
                     </div>
                 </div>
 
                 <div id="addView" class="hidden" style="padding:40px;">
-                    <h2>Find Friend by ID</h2>
-                    <input type="text" id="searchId" placeholder="(XXX) XXX-XXX" style="width:100%; margin-top:20px; font-size:1.5rem;">
-                    <button class="btn btn-main" style="width:100%; margin-top:20px;" onclick="addContact()">Connect</button>
+                    <h2>Connect to Friend</h2>
+                    <input type="text" id="searchId" placeholder="(000) 000-000" style="width: 100%; margin-top:20px;">
+                    <button class="btn btn-main" style="width:100%; margin-top:20px;" onclick="addContact()">Add by ID</button>
                 </div>
             </main>
         </div>
     </div>
 
-    <script>
-        // --- SUPABASE CONFIGURATION ---
-        // REPLACE 'YOUR_SUPABASE_URL' WITH YOUR ACTUAL PROJECT URL
-        const SUPABASE_URL = 'https://ubpsifoqjfzgmvhvwspv.supabase.co'; 
-        const SUPABASE_KEY = 'sb_secret_3qhfwLrkFlac3Gef-1lYoA_JxWNvQu8';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <div id="callOverlay" class="hidden call-overlay">
+        <h2>Calling...</h2>
+        <video id="localVideo" autoplay playsinline></video>
+        <button class="btn" style="background:red; color:white; margin-top:20px;" onclick="endCall()">Hang Up</button>
+    </div>
 
-        let currentUser = null;
+    <script>
+        // --- CLOUD CONFIG ---
+        const SB_URL = "https://ubpsifoqjfzgmvhvwspv.supabase.co";
+        const SB_KEY = "sb_publishable_tW5cED71cJC5tZtXla5D-g_wv4NfVwo"; // Service role/Secret key
+        const supabase = collections = supabase.createClient(SB_URL, SB_KEY);
+
+        let db = { users: {}, chats: {}, presence: {} };
+        let currentUser = JSON.parse(localStorage.getItem('balling_session'));
         let activeId = null;
         let isLoginMode = false;
 
-        // --- CORE INITIALIZATION ---
-        async function init() {
-            const session = localStorage.getItem('balling_session_id');
-            if (session) {
-                const { data, error } = await supabase.from('users').select('*').eq('id', session).single();
-                if (data) {
-                    currentUser = data;
-                    showApp();
-                } else {
-                    showAuth();
-                }
-            } else {
-                showAuth();
+        // --- CLOUD DATA FUNCTIONS ---
+        async function loadCloudDB() {
+            const { data, error } = await supabase.from('balling_data').select('content').eq('id', 'main_db').single();
+            if (data) {
+                db = data.content;
+                renderContacts();
+                if(activeId) renderMessages();
+                checkPresence();
             }
-            document.getElementById('loader').classList.add('hidden');
         }
 
-        // --- AUTH FUNCTIONS ---
-        function toggleAuth() {
+        async function saveCloudDB() {
+            document.getElementById('cloudStatus').innerText = "⏳ SAVING...";
+            const { error } = await supabase.from('balling_data').upsert({ id: 'main_db', content: db });
+            document.getElementById('cloudStatus').innerText = "☁️ SYNCED";
+        }
+
+        // --- AUTH ---
+        function toggleAuthMode() {
             isLoginMode = !isLoginMode;
-            document.getElementById('authSubtitle').innerText = isLoginMode ? "Login to access your messages." : "Sign up to start balling.";
             document.getElementById('primaryAuthBtn').innerText = isLoginMode ? "Login" : "Create Account";
+            document.getElementById('authToggleLink').innerText = isLoginMode ? "Need an account? Sign Up" : "Already have an account? Login";
         }
 
-        async function handleAuth() {
+        async function processAuth() {
             const user = document.getElementById('usernameField').value.trim();
             const pass = document.getElementById('passwordField').value.trim();
+            if(!user || !pass) return alert("Missing fields");
 
-            if (isLoginMode) {
-                const { data, error } = await supabase.from('users')
-                    .select('*').eq('username', user).eq('password', pass).single();
-                if (data) loginSuccess(data);
-                else alert("Account not found or password wrong.");
+            await loadCloudDB();
+
+            if(isLoginMode) {
+                const id = Object.keys(db.users).find(k => db.users[k].user === user && db.users[k].pass === pass);
+                if(id) loginUser(id); else alert("Invalid credentials");
             } else {
-                const newId = `(${Math.floor(Math.random()*900)+100}) ${Math.floor(Math.random()*900)+100}-${Math.floor(Math.random()*900)+100}`;
-                const { data, error } = await supabase.from('users').insert([
-                    { id: newId, username: user, password: pass, friends: [], blocked: [], last_seen: new Date() }
-                ]).select().single();
-                
-                if (data) {
-                    document.getElementById('generatedId').innerText = data.id;
-                    document.getElementById('idDisplay').classList.remove('hidden');
-                    document.getElementById('primaryAuthBtn').innerText = "Start Balling";
-                    document.getElementById('primaryAuthBtn').onclick = () => loginSuccess(data);
-                }
+                const id = `(${Math.floor(Math.random()*900)+100}) ${Math.floor(Math.random()*900)+100}-${Math.floor(Math.random()*900)+100}`;
+                db.users[id] = { user, pass, friends: {}, lastSeen: Date.now() };
+                document.getElementById('generatedId').innerText = id;
+                document.getElementById('idDisplay').classList.remove('hidden');
+                document.getElementById('primaryAuthBtn').innerText = "Confirm & Enter";
+                document.getElementById('primaryAuthBtn').onclick = () => loginUser(id);
+                await saveCloudDB();
             }
         }
 
-        function loginSuccess(user) {
-            localStorage.setItem('balling_session_id', user.id);
+        function loginUser(id) {
+            currentUser = { id, name: db.users[id].user };
+            localStorage.setItem('balling_session', JSON.stringify(currentUser));
             location.reload();
         }
 
         function signOut() {
-            localStorage.removeItem('balling_session_id');
+            localStorage.removeItem('balling_session');
             location.reload();
         }
 
         // --- MESSAGING ---
         async function sendMsg() {
-            const text = document.getElementById('chatInput').value.trim();
-            if (!text || !activeId) return;
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if(!text || !activeId) return;
 
-            const room = [currentUser.id, activeId].sort().join('_');
-            await supabase.from('messages').insert([
-                { room_id: room, sender_id: currentUser.id, text: text, sender_name: currentUser.username }
-            ]);
-
-            document.getElementById('chatInput').value = "";
-            loadMessages();
+            const chan = [currentUser.id, activeId].sort().join('_');
+            if(!db.chats[chan]) db.chats[chan] = [];
+            
+            db.chats[chan].push({ sender: currentUser.id, name: currentUser.name, text, time: Date.now() });
+            input.value = "";
+            renderMessages();
+            await saveCloudDB();
         }
 
-        async function loadMessages() {
-            const room = [currentUser.id, activeId].sort().join('_');
-            const { data } = await supabase.from('messages')
-                .select('*').eq('room_id', room).order('created_at', { ascending: true });
-            
+        function renderMessages() {
             const box = document.getElementById('messageList');
+            const chan = [currentUser.id, activeId].sort().join('_');
             box.innerHTML = "";
-            data?.forEach(m => {
-                const b = document.createElement('div');
-                b.className = `bubble ${m.sender_id === currentUser.id ? 'me' : 'them'}`;
-                b.innerText = m.text;
-                box.appendChild(b);
-            });
+            if(db.chats[chan]) {
+                db.chats[chan].forEach(m => {
+                    const b = document.createElement('div');
+                    b.className = `bubble ${m.sender === currentUser.id ? 'me' : 'them'}`;
+                    b.innerText = m.text;
+                    box.appendChild(b);
+                });
+            }
             box.scrollTop = box.scrollHeight;
         }
 
-        // --- REAL-TIME SUBSCRIPTION ---
-        function subscribeToEvents() {
-            // Listen for new messages globally
-            supabase.channel('public:messages')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-                const msg = payload.new;
-                if (msg.room_id.includes(currentUser.id)) {
-                    if (activeId && msg.room_id.includes(activeId)) {
-                        loadMessages();
-                    } else {
-                        showNotification(msg.sender_name, msg.text);
-                    }
-                }
-            }).subscribe();
-        }
-
-        function showNotification(sender, text) {
-            if (Notification.permission === "granted") {
-                new Notification(`Balling: ${sender}`, { body: text });
-            }
-        }
-
-        // --- UI HELPERS ---
-        function showApp() {
-            document.getElementById('authView').classList.add('hidden');
-            document.getElementById('appView').classList.remove('hidden');
-            document.getElementById('appHeader').classList.remove('hidden');
-            document.getElementById('myName').innerText = currentUser.username;
-            document.getElementById('myId').innerText = currentUser.id;
-            renderContacts();
-            subscribeToEvents();
-            Notification.requestPermission();
-        }
-
-        function showAuth() {
-            document.getElementById('authView').classList.remove('hidden');
-        }
-
+        // --- CONTACTS ---
         async function addContact() {
             const id = document.getElementById('searchId').value.trim();
-            const { data } = await supabase.from('users').select('*').eq('id', id).single();
-            if (data) {
-                const newFriends = [...currentUser.friends, {id: data.id, name: data.username}];
-                await supabase.from('users').update({ friends: newFriends }).eq('id', currentUser.id);
-                currentUser.friends = newFriends;
-                renderContacts();
-                setNav('contacts');
-            } else {
-                alert("User not found!");
-            }
+            if(!db.users[id]) return alert("ID not found");
+            db.users[currentUser.id].friends[id] = db.users[id].user;
+            await saveCloudDB();
+            setNav('contacts');
+        }
+
+        function openChat(id) {
+            activeId = id;
+            document.getElementById('chatPlaceholder').classList.add('hidden');
+            document.getElementById('chatView').classList.remove('hidden');
+            document.getElementById('chatName').innerText = db.users[id].user;
+            renderMessages();
         }
 
         function renderContacts() {
             const container = document.getElementById('contactContainer');
             container.innerHTML = "";
-            currentUser.friends.forEach(f => {
+            const friends = db.users[currentUser.id]?.friends || {};
+            Object.keys(friends).forEach(fId => {
                 const div = document.createElement('div');
-                div.className = `nav-item ${activeId === f.id ? 'active' : ''}`;
-                div.innerHTML = `<strong>${f.name}</strong><br><small>${f.id}</small>`;
-                div.onclick = () => {
-                    activeId = f.id;
-                    document.getElementById('chatPlaceholder').classList.add('hidden');
-                    document.getElementById('chatView').classList.remove('hidden');
-                    document.getElementById('chatName').innerText = f.name;
-                    loadMessages();
-                    renderContacts();
-                };
+                div.className = `nav-item ${activeId === fId ? 'active' : ''}`;
+                div.innerHTML = `<strong>${friends[fId]}</strong><br><small>${fId}</small>`;
+                div.onclick = () => openChat(fId);
                 container.appendChild(div);
             });
         }
@@ -305,7 +257,44 @@
             document.getElementById('chatView').classList.add('hidden');
         }
 
-        init();
+        // --- REALTIME POLLING ---
+        function checkPresence() {
+            const call = db.presence[currentUser.id];
+            if(call && call.type === 'incoming') {
+                if(confirm(`Incoming call from ${call.name}!`)) {
+                    startCall(true);
+                }
+                delete db.presence[currentUser.id];
+                saveCloudDB();
+            }
+        }
+
+        async function startCall(isIncoming = false) {
+            document.getElementById('callOverlay').classList.remove('hidden');
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            document.getElementById('localVideo').srcObject = stream;
+            if(!isIncoming) {
+                db.presence[activeId] = { type: 'incoming', from: currentUser.id, name: currentUser.name };
+                saveCloudDB();
+            }
+        }
+
+        function endCall() {
+            location.reload();
+        }
+
+        // Init
+        if(currentUser) {
+            document.getElementById('authView').classList.add('hidden');
+            document.getElementById('appView').classList.remove('hidden');
+            document.getElementById('appHeader').classList.remove('hidden');
+            document.getElementById('myName').innerText = currentUser.name;
+            document.getElementById('myId').innerText = currentUser.id;
+            
+            // Start sync loop
+            loadCloudDB();
+            setInterval(loadCloudDB, 4000); // Check for new messages every 4 seconds
+        }
     </script>
 </body>
 </html>
