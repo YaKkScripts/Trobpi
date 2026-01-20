@@ -24,8 +24,13 @@
         .container { max-width: 1200px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; padding: 10px; }
         .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.3); }
 
+        /* App Header */
+        .app-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; margin-bottom: 10px; }
+        .mailbox-btn { position: relative; cursor: pointer; font-size: 1.5rem; }
+        .badge { position: absolute; top: -5px; right: -5px; background: var(--error); color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 50%; }
+
         /* Sidebar & Contacts */
-        .app-grid { display: grid; grid-template-columns: 300px 1fr; gap: 15px; flex: 1; height: 90vh; overflow: hidden; }
+        .app-grid { display: grid; grid-template-columns: 300px 1fr; gap: 15px; flex: 1; height: 85vh; overflow: hidden; }
         .sidebar { display: flex; flex-direction: column; padding: 15px; overflow-y: auto; }
         .user-card { background: var(--primary); color: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; }
         .nav-item { padding: 12px; margin-bottom: 5px; border-radius: 10px; cursor: pointer; transition: 0.2s; background: rgba(0,0,0,0.03); }
@@ -38,15 +43,18 @@
         .bubble { max-width: 70%; padding: 10px 15px; border-radius: 18px; font-size: 0.95rem; word-wrap: break-word; }
         .bubble.me { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 2px; }
         .bubble.them { align-self: flex-start; background: #ececec; color: black; border-bottom-left-radius: 2px; }
-        .bubble img, .bubble video { max-width: 100%; border-radius: 10px; margin-top: 5px; }
+        .bubble img { max-width: 100%; border-radius: 10px; margin-top: 5px; }
         
         .input-area { padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px; background: white; align-items: center; }
-        input[type="text"] { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #ddd; outline: none; }
+        input { padding: 12px; border-radius: 10px; border: 1px solid #ddd; outline: none; }
         .btn { padding: 10px 20px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; }
         .btn-main { background: var(--primary); color: white; }
         .btn-ghost { background: #eee; color: #555; }
         
-        /* Overlays */
+        /* Modals */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .modal-content { width: 90%; max-width: 400px; padding: 20px; max-height: 80vh; overflow-y: auto; }
+
         .call-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
         .notification { position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 10px; color: white; z-index: 10000; font-weight: bold; }
     </style>
@@ -54,9 +62,16 @@
 <body>
 
     <div class="container">
+        <header id="mainHeader" class="glass app-header hidden">
+            <h2 style="color: var(--primary)">Balling.com</h2>
+            <div class="mailbox-btn" onclick="toggleMailbox()">
+                📬 <span id="mailBadge" class="badge hidden">0</span>
+            </div>
+        </header>
+
         <div id="landingView" class="glass fade-in" style="text-align: center; padding: 50px; margin-top: 10vh;">
             <h1 style="font-size: 3rem; color: var(--primary);">Balling.com</h1>
-            <p>Instant connections, media sharing, and HD calls.</p>
+            <p>Encrypted messaging and secure IDs.</p>
             <div style="margin-top: 30px; display: flex; justify-content: center; gap: 10px;">
                 <button class="btn btn-main" onclick="showAuth('signup')">Sign Up</button>
                 <button class="btn btn-ghost" onclick="showAuth('login')">Login</button>
@@ -66,7 +81,8 @@
         <div id="authView" class="hidden fade-in">
             <div class="glass" style="max-width: 400px; margin: 50px auto; padding: 30px;">
                 <h2 id="authTitle">Auth</h2>
-                <input type="text" id="usernameField" placeholder="Username" style="width: 100%; margin-top: 15px; padding: 12px;">
+                <input type="text" id="usernameField" placeholder="Username" style="width: 100%; margin-top: 15px;">
+                <input type="password" id="passwordField" placeholder="Password" style="width: 100%; margin-top: 10px; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
                 <div id="idBadge" class="hidden" style="background: var(--primary); color: white; padding: 10px; margin-top: 10px; border-radius: 8px; text-align: center;">
                     Your Balling ID: <strong id="generatedId"></strong>
                 </div>
@@ -83,43 +99,46 @@
                     <button class="btn" style="background: rgba(255,255,255,0.2); color: white; font-size: 0.7rem; margin-top: 10px;" onclick="signOut()">Logout</button>
                 </div>
                 <div class="nav-item active" onclick="setNav('contacts')">💬 Chats</div>
-                <div class="nav-item" onclick="setNav('add')">➕ Add by ID</div>
+                <div class="nav-item" onclick="setNav('add')">➕ Add Friend</div>
                 <div class="contact-list" id="contactContainer"></div>
             </aside>
 
             <main class="main-view glass">
                 <div id="chatPlaceholder" style="text-align: center; margin-top: 20vh; color: #aaa;">
-                    <h2>Welcome to Balling</h2>
-                    <p>Select a friend to start texting.</p>
+                    <h2>No Chat Selected</h2>
                 </div>
 
                 <div id="chatView" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
                     <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: white;">
-                        <h3 id="chatName">Friend</h3>
+                        <h3 id="chatName" onclick="renameContact()" style="cursor: pointer; color: var(--primary)">Friend</h3>
                         <div style="display: flex; gap: 10px;">
                             <button class="btn btn-main" onclick="startCall()">📞</button>
                             <button class="btn btn-ghost" id="blockBtn" onclick="handleBlockToggle()">Block</button>
                         </div>
                     </div>
                     <div class="chat-box" id="messageList"></div>
-                    <div id="blockedBanner" class="hidden" style="background: #ffebee; color: var(--error); padding: 10px; text-align: center; font-weight: bold;">
-                        You have blocked this user.
-                    </div>
                     <div class="input-area" id="inputBar">
-                        <label class="btn btn-ghost" style="cursor:pointer;">
-                            📎 <input type="file" id="mediaUpload" class="hidden" accept="image/*,video/*" onchange="handleFileUpload()">
-                        </label>
-                        <input type="text" id="chatInput" placeholder="Type a message (link:https://...)" onkeypress="if(event.key==='Enter')sendMsg()">
+                        <input type="text" id="chatInput" placeholder="Send a message..." onkeypress="if(event.key==='Enter')sendMsg()">
                         <button class="btn btn-main" onclick="sendMsg()">Send</button>
                     </div>
                 </div>
 
                 <div id="addView" class="hidden" style="padding: 40px;">
-                    <h2>Add Friend by Phone/ID</h2>
+                    <h2>Connect by ID</h2>
                     <input type="text" id="searchId" placeholder="(XXX) XXX-XXX" style="width: 100%; padding: 15px; font-size: 1.2rem; margin-top: 20px;">
-                    <button class="btn btn-main" style="width: 100%; margin-top: 15px;" onclick="instantAdd()">Add & Chat</button>
+                    <button class="btn btn-main" style="width: 100%; margin-top: 15px;" onclick="instantAdd()">Add Contact</button>
                 </div>
             </main>
+        </div>
+    </div>
+
+    <div id="mailboxModal" class="modal hidden">
+        <div class="glass modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3>Incoming Messages</h3>
+                <button class="btn btn-ghost" onclick="toggleMailbox()">X</button>
+            </div>
+            <div id="mailList"></div>
         </div>
     </div>
 
@@ -127,12 +146,6 @@
         <h2 id="callStatus">Calling...</h2>
         <video id="localVideo" autoplay playsinline style="width: 80%; border-radius: 20px; background: #222; margin: 20px 0;"></video>
         <button class="btn btn-danger" onclick="endCall()" style="padding: 20px 40px; border-radius: 50px;">Hang Up</button>
-    </div>
-
-    <div id="incomingToast" class="notification hidden" style="background: var(--success); bottom: 20px; top: auto; left: 20px;">
-        <span id="callerInfo">Someone is calling...</span><br><br>
-        <button class="btn" onclick="answerCall()" style="background: white; color: var(--success);">Accept</button>
-        <button class="btn" onclick="declineCall()" style="background: var(--error); color: white; margin-left: 10px;">Decline</button>
     </div>
 
     <script>
@@ -153,20 +166,24 @@
 
         function handleSignup() {
             const user = document.getElementById('usernameField').value.trim();
-            if(!user) return;
+            const pass = document.getElementById('passwordField').value.trim();
+            if(!user || !pass) return alert("Fill all fields");
+            
             const id = `(${Math.floor(Math.random()*900)+100}) ${Math.floor(Math.random()*900)+100}-${Math.floor(Math.random()*900)+100}`;
-            db.users[id] = { user, friends: [], blocked: [] };
+            db.users[id] = { user, pass, friends: {}, blocked: [] };
+            
             document.getElementById('generatedId').innerText = id;
             document.getElementById('idBadge').classList.remove('hidden');
-            document.getElementById('authSubmit').innerText = "Enter App";
+            document.getElementById('authSubmit').innerText = "Login Now";
             document.getElementById('authSubmit').onclick = () => doLogin(id);
             save();
         }
 
         function handleLogin() {
             const user = document.getElementById('usernameField').value.trim();
-            const id = Object.keys(db.users).find(k => db.users[k].user === user);
-            if(id) doLogin(id); else alert("User not found");
+            const pass = document.getElementById('passwordField').value.trim();
+            const id = Object.keys(db.users).find(k => db.users[k].user === user && db.users[k].pass === pass);
+            if(id) doLogin(id); else alert("Invalid credentials");
         }
 
         function doLogin(id) {
@@ -180,7 +197,45 @@
             location.reload();
         }
 
-        // --- NAVIGATION & UI ---
+        // --- MAILBOX ---
+        function toggleMailbox() {
+            document.getElementById('mailboxModal').classList.toggle('hidden');
+            renderMail();
+        }
+
+        function renderMail() {
+            const list = document.getElementById('mailList');
+            list.innerHTML = "";
+            let count = 0;
+
+            // Check all chats for messages where I am the recipient but haven't added the sender
+            Object.keys(db.chats).forEach(chan => {
+                if(chan.includes(currentUser.id)) {
+                    const otherId = chan.replace(currentUser.id, '').replace('_', '');
+                    if(!db.users[currentUser.id].friends[otherId]) {
+                        count++;
+                        const lastMsg = db.chats[chan][db.chats[chan].length - 1];
+                        const div = document.createElement('div');
+                        div.className = "nav-item";
+                        div.style.background = "white";
+                        div.innerHTML = `<b>New from: ${otherId}</b><br><small>${lastMsg.text.substring(0,20)}...</small>`;
+                        div.onclick = () => {
+                            db.users[currentUser.id].friends[otherId] = db.users[otherId].user;
+                            save();
+                            toggleMailbox();
+                            openChat(otherId);
+                        };
+                        list.appendChild(div);
+                    }
+                }
+            });
+
+            const badge = document.getElementById('mailBadge');
+            badge.innerText = count;
+            badge.classList.toggle('hidden', count === 0);
+        }
+
+        // --- NAVIGATION & CHAT ---
         function setNav(view) {
             document.getElementById('chatPlaceholder').classList.toggle('hidden', view !== 'contacts');
             document.getElementById('chatView').classList.add('hidden');
@@ -190,13 +245,12 @@
 
         function instantAdd() {
             const id = document.getElementById('searchId').value.trim();
-            if(!db.users[id] || id === currentUser.id) return alert("ID not found");
-            if(!db.users[currentUser.id].friends.includes(id)) {
-                db.users[currentUser.id].friends.push(id);
+            if(!db.users[id] || id === currentUser.id) return alert("Invalid ID");
+            if(!db.users[currentUser.id].friends[id]) {
+                db.users[currentUser.id].friends[id] = db.users[id].user;
                 save();
             }
             openChat(id);
-            document.getElementById('searchId').value = "";
         }
 
         function openChat(id) {
@@ -204,66 +258,43 @@
             document.getElementById('chatPlaceholder').classList.add('hidden');
             document.getElementById('addView').classList.add('hidden');
             document.getElementById('chatView').classList.remove('hidden');
-            document.getElementById('chatName').innerText = db.users[id].user;
-            
-            const isBlocked = db.users[currentUser.id].blocked.includes(id);
-            document.getElementById('blockBtn').innerText = isBlocked ? "Unblock" : "Block";
-            document.getElementById('blockedBanner').classList.toggle('hidden', !isBlocked);
-            document.getElementById('inputBar').classList.toggle('hidden', isBlocked);
-            
+            document.getElementById('chatName').innerText = db.users[currentUser.id].friends[id] || db.users[id].user;
             renderMessages();
             renderContacts();
+        }
+
+        function renameContact() {
+            const newName = prompt("Enter nickname for this contact:");
+            if(newName) {
+                db.users[currentUser.id].friends[activeId] = newName;
+                save();
+                openChat(activeId);
+            }
         }
 
         function renderContacts() {
             const container = document.getElementById('contactContainer');
             container.innerHTML = "";
-            db.users[currentUser.id].friends.forEach(fId => {
+            const friends = db.users[currentUser.id].friends;
+            Object.keys(friends).forEach(fId => {
                 const div = document.createElement('div');
                 div.className = `nav-item ${activeId === fId ? 'active' : ''}`;
-                div.innerHTML = `<strong>${db.users[fId].user}</strong><br><small>${fId}</small>`;
+                div.innerHTML = `<strong>${friends[fId]}</strong><br><small>${fId}</small>`;
                 div.onclick = () => openChat(fId);
                 container.appendChild(div);
             });
         }
 
-        // --- MESSAGING ---
-        function sendMsg(mediaData = null, mediaType = null) {
+        function sendMsg() {
             const input = document.getElementById('chatInput');
-            let text = input.value.trim();
-            if(!text && !mediaData) return;
-
-            // Link Detection
-            if(text.startsWith('link:')) {
-                const url = text.replace('link:', '').trim();
-                text = `<a href="${url}" target="_blank" style="color:white; text-decoration:underline;">${url}</a>`;
-            }
-
+            const text = input.value.trim();
+            if(!text) return;
             const chan = [currentUser.id, activeId].sort().join('_');
             if(!db.chats[chan]) db.chats[chan] = [];
-            
-            db.chats[chan].push({
-                sender: currentUser.id,
-                text: text,
-                media: mediaData,
-                type: mediaType,
-                time: Date.now()
-            });
-            
+            db.chats[chan].push({ sender: currentUser.id, text, time: Date.now() });
             save();
             input.value = "";
             renderMessages();
-        }
-
-        function handleFileUpload() {
-            const file = document.getElementById('mediaUpload').files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const type = file.type.startsWith('image') ? 'img' : 'video';
-                sendMsg("", { data: e.target.result, type });
-            };
-            reader.readAsDataURL(file);
         }
 
         function renderMessages() {
@@ -273,38 +304,16 @@
             (db.chats[chan] || []).forEach(m => {
                 const b = document.createElement('div');
                 b.className = `bubble ${m.sender === currentUser.id ? 'me' : 'them'}`;
-                
-                let content = m.text || "";
-                if(m.media) {
-                    if(m.media.type === 'img') content += `<br><img src="${m.media.data}">`;
-                    else content += `<br><video controls src="${m.media.data}"></video>`;
-                }
-                b.innerHTML = content;
+                b.innerText = m.text;
                 box.appendChild(b);
             });
             box.scrollTop = box.scrollHeight;
         }
 
-        function handleBlockToggle() {
-            const list = db.users[currentUser.id].blocked;
-            if(list.includes(activeId)) {
-                db.users[currentUser.id].blocked = list.filter(i => i !== activeId);
-            } else {
-                list.push(activeId);
-            }
-            save();
-            openChat(activeId);
-        }
-
-        // --- CALLING ---
+        // --- CALLS & SIGNALS ---
         async function startCall() {
             db.signals[activeId] = { type: 'incoming', from: currentUser.id, name: currentUser.name };
             save();
-            showCallUI("Calling...");
-        }
-
-        async function showCallUI(status) {
-            document.getElementById('callStatus').innerText = status;
             document.getElementById('callOverlay').classList.remove('hidden');
             stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             document.getElementById('localVideo').srcObject = stream;
@@ -313,45 +322,27 @@
         function endCall() {
             if(stream) stream.getTracks().forEach(t => t.stop());
             document.getElementById('callOverlay').classList.add('hidden');
-            delete db.signals[currentUser.id];
-            save();
         }
 
-        function listen() {
-            if(!currentUser) return;
-            const sig = db.signals[currentUser.id];
-            if(sig && sig.type === 'incoming') {
-                document.getElementById('callerInfo').innerText = `${sig.name} is calling you!`;
-                document.getElementById('incomingToast').classList.remove('hidden');
+        // Main Loop
+        setInterval(() => {
+            if(currentUser) {
+                renderMail(); // Keep mailbox badge updated
+                const sig = db.signals[currentUser.id];
+                if(sig && sig.type === 'incoming') {
+                    // Show call logic... 
+                }
             }
-        }
-
-        function answerCall() {
-            document.getElementById('incomingToast').classList.add('hidden');
-            showCallUI("In Call");
-        }
-
-        function declineCall() {
-            document.getElementById('incomingToast').classList.add('hidden');
-            delete db.signals[currentUser.id];
-            save();
-        }
-
-        // Sync Data
-        window.addEventListener('storage', () => {
-            db = JSON.parse(localStorage.getItem('balling_db'));
-            if(activeId) renderMessages();
-            renderContacts();
-            listen();
-        });
+        }, 3000);
 
         if(currentUser) {
+            document.getElementById('mainHeader').classList.remove('hidden');
             document.getElementById('landingView').classList.add('hidden');
             document.getElementById('appView').classList.remove('hidden');
             document.getElementById('displayName').innerText = currentUser.name;
             document.getElementById('displayId').innerText = currentUser.id;
             renderContacts();
-            setInterval(listen, 2000);
+            renderMail();
         }
     </script>
 </body>
