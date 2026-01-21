@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Balling.com | Elite Connect</title>
+    <title>Balling.com | Premium</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -14,157 +14,153 @@
             --glass-bg: rgba(255, 255, 255, 0.95);
         }
         [data-theme='dark'] {
-            --bg: #0f1215; --white: #1a1d21;
-            --text: #e0e0e0; --glass-bg: rgba(26, 29, 33, 0.95);
+            --bg: #0f172a; --white: #1e293b;
+            --text: #f1f5f9; --glass-bg: rgba(30, 41, 59, 0.95);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; transition: background 0.2s; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; transition: background 0.3s, color 0.3s; }
         body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
         .hidden { display: none !important; }
+
+        /* Splash Screen */
+        #splash { position: fixed; inset: 0; background: #000; z-index: 30000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 1s cubic-bezier(0.4, 0, 0.2, 1); }
+        .logo-b { font-size: 100px; font-weight: 900; color: #fff; background: var(--primary); width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; border-radius: 35px; box-shadow: 0 0 50px var(--primary); animation: b-grow 2s infinite alternate; }
+        @keyframes b-grow { from { transform: scale(1); filter: brightness(1); } to { transform: scale(1.1); filter: brightness(1.2); } }
+
+        /* Main Layout */
+        .container { max-width: 1400px; margin: 0 auto; height: 100vh; display: flex; padding: 15px; gap: 15px; }
+        .glass { background: var(--glass-bg); backdrop-filter: blur(20px); border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
         
-        /* Premium Startup */
-        #splash { position: fixed; inset: 0; background: #000; z-index: 30000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .logo-b { font-size: 100px; font-weight: 900; color: #fff; background: linear-gradient(45deg, var(--primary), #00e5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 20px rgba(0,188,212,0.5)); transform: scale(0.5); animation: zoomIn 1.2s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes zoomIn { to { transform: scale(1); } }
-        .loader-bar { width: 150px; height: 3px; background: #222; border-radius: 10px; margin-top: 20px; overflow: hidden; }
-        .loader-fill { width: 0%; height: 100%; background: var(--primary); animation: load 2s forwards; }
-        @keyframes load { to { width: 100%; } }
+        /* Sidebar */
+        .sidebar { width: 350px; display: flex; flex-direction: column; padding: 20px; }
+        .user-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 20px; border-radius: 20px; color: white; display: flex; align-items: center; gap: 15px; cursor: pointer; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,188,212,0.3); }
+        .pfp-large { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.3); }
+        .contact-item { display: flex; align-items: center; gap: 12px; padding: 15px; border-radius: 15px; cursor: pointer; margin-bottom: 8px; border: 1px solid transparent; }
+        .contact-item:hover { background: rgba(0,0,0,0.05); }
+        .contact-item.active { background: var(--primary); color: white; }
 
-        /* Container & Layout */
-        .container { max-width: 1400px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; padding: 15px; }
-        .glass { background: var(--glass-bg); backdrop-filter: blur(15px); border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid rgba(128,128,128,0.1); }
-        .app-grid { display: grid; grid-template-columns: 350px 1fr; gap: 20px; flex: 1; height: 90vh; overflow: hidden; }
-
-        /* Sidebar & Contacts */
-        .sidebar { display: flex; flex-direction: column; padding: 20px; overflow: hidden; }
-        .user-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 18px; border-radius: 20px; margin-bottom: 15px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: transform 0.2s; }
-        .user-card:hover { transform: translateY(-3px); }
-        .pfp { width: 55px; height: 55px; border-radius: 18px; object-fit: cover; background: #eee; border: 2px solid rgba(255,255,255,0.3); }
-
-        /* Chat Components */
+        /* Chat Section */
+        .chat-area { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .chat-header { padding: 20px; border-bottom: 1px solid rgba(128,128,128,0.1); display: flex; justify-content: space-between; align-items: center; }
         .chat-box { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .typing-indicator { font-size: 0.8rem; color: var(--primary); padding: 5px 25px; font-style: italic; }
+        
         .bubble { max-width: 70%; padding: 14px 18px; border-radius: 22px; font-size: 0.95rem; line-height: 1.4; position: relative; }
         .bubble.me { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px; }
-        .bubble.them { align-self: flex-start; background: var(--white); border: 1px solid rgba(128,128,128,0.1); border-bottom-left-radius: 4px; }
-        .sticker { max-width: 150px; border-radius: 15px; margin: 5px 0; }
+        .bubble.them { align-self: flex-start; background: var(--white); border: 1px solid rgba(128,128,128,0.2); border-bottom-left-radius: 4px; }
+        .seen-tick { font-size: 0.7rem; margin-left: 5px; opacity: 0.8; }
 
-        /* Emoji System */
-        .emoji-panel { position: absolute; bottom: 80px; left: 20px; width: 300px; height: 250px; background: var(--white); border-radius: 20px; padding: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); display: grid; grid-template-columns: repeat(6, 1fr); overflow-y: auto; gap: 8px; z-index: 100; }
-        .emoji-btn { font-size: 22px; cursor: pointer; border: none; background: none; }
-        .emoji-btn:hover { transform: scale(1.2); }
+        /* Emoji Grid */
+        .emoji-panel { height: 200px; overflow-y: auto; display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; padding: 15px; border-top: 1px solid #ddd; }
+        .emoji-btn { font-size: 24px; cursor: pointer; border: none; background: none; }
 
-        /* Call Overlay */
-        .call-ui { position: fixed; inset: 0; background: #0b0e11; z-index: 25000; display: flex; flex-direction: column; }
-        .call-grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; padding: 30px; }
-        .v-card { position: relative; background: #1a1d21; border-radius: 30px; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .v-card video { width: 100%; height: 100%; object-fit: cover; }
-        .v-off { position: absolute; width: 120px; height: 120px; border-radius: 50%; object-fit: cover; }
-        .v-label { position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.6); color: white; padding: 8px 15px; border-radius: 12px; font-size: 0.8rem; }
+        /* Call Screen */
+        .call-overlay { position: fixed; inset: 0; background: #000; z-index: 25000; display: flex; flex-direction: column; }
+        .video-grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; padding: 20px; }
+        .video-box { position: relative; border-radius: 25px; overflow: hidden; background: #1e293b; border: 2px solid #334155; }
+        .fallback-pfp { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5; }
+        .mic-label { position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 10px; color: white; font-size: 0.8rem; }
+
+        /* Modals */
+        .modal-body { width: 400px; padding: 30px; border-radius: 30px; text-align: center; }
+        .btn { padding: 12px 24px; border-radius: 15px; border: none; cursor: pointer; font-weight: bold; font-size: 1rem; }
     </style>
 </head>
-<body>
+<body onclick="hideMenu()">
 
-<div id="splash">
-    <div class="logo-b">BALLING</div>
-    <div class="loader-bar"><div class="loader-fill"></div></div>
-</div>
+<div id="splash"><div class="logo-b">B</div><h2 style="color:white; margin-top:20px; letter-spacing:5px;">BALLING</h2></div>
 
 <div class="container">
-    <div id="authView" class="hidden">
-        <div class="glass" style="max-width: 450px; margin: 100px auto; padding: 50px; text-align: center;">
-            <h1 style="margin-bottom: 30px; font-size: 2.5rem;">B</h1>
-            <div id="authToggle">
-                <input type="text" id="userIn" placeholder="Username" style="width: 100%; margin-bottom: 12px; padding:15px; border-radius:12px; border:1px solid #ddd;">
-                <input type="password" id="passIn" placeholder="Password" style="width: 100%; margin-bottom: 20px; padding:15px; border-radius:12px; border:1px solid #ddd;">
-                <button class="btn-main" onclick="handleAuth()" style="width:100%; padding:15px; border-radius:12px; background:var(--primary); color:white; border:none; cursor:pointer; font-weight:bold;">Sign In / Sign Up</button>
-            </div>
+    <div id="authView" class="hidden" style="margin: auto;">
+        <div class="glass modal-body">
+            <h1 style="color: var(--primary); margin-bottom: 30px;">Welcome to Balling</h1>
+            <input type="text" id="userIn" placeholder="Username" style="width: 100%; padding:15px; border-radius:15px; border:1px solid #ddd; margin-bottom:10px;">
+            <input type="password" id="passIn" placeholder="Password" style="width: 100%; padding:15px; border-radius:15px; border:1px solid #ddd; margin-bottom:20px;">
+            <button class="btn" style="background:var(--primary); color:white; width:100%;" onclick="handleAuth()">Join the Cloud</button>
         </div>
     </div>
 
-    <div id="appView" class="hidden app-grid">
-        <aside class="sidebar glass">
-            <div class="user-card" onclick="openProfile()">
-                <img id="myPfp" src="" class="pfp">
-                <div style="overflow:hidden">
-                    <h3 id="myNameDisplay" style="text-overflow:ellipsis; white-space:nowrap; overflow:hidden;">User</h3>
-                    <small id="myIdDisplay" style="opacity:0.8">ID</small>
+    <aside id="sidebarView" class="glass sidebar hidden">
+        <div class="user-card" onclick="openProfile()">
+            <img id="myPfp" src="" class="pfp-large">
+            <div style="overflow:hidden;">
+                <h3 id="myNameDisplay" style="white-space:nowrap; text-overflow:ellipsis;">User</h3>
+                <small id="myIdDisplay" style="opacity:0.8;">ID: --</small>
+            </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <button class="btn" style="flex:1; background:var(--primary); color:white;" onclick="openAddFriend()">+ Friend</button>
+            <button class="btn" style="flex:1; background:var(--white); border:1px solid #ddd;" onclick="openGroupCreator()">+ Group</button>
+        </div>
+        <div id="contactList" style="flex:1; overflow-y:auto;"></div>
+    </aside>
+
+    <main id="chatAreaView" class="glass chat-area hidden">
+        <div id="noChat" style="margin:auto; text-align:center; opacity:0.5;">
+            <div style="font-size:50px;">☁️</div>
+            <h2>Pick a friend to Ball</h2>
+        </div>
+        
+        <div id="activeChat" class="hidden" style="height:100%; display:flex; flex-direction:column;">
+            <div class="chat-header">
+                <div>
+                    <h2 id="targetName">Name</h2>
+                    <small id="typingStatus" style="color:var(--primary);"></small>
                 </div>
+                <button class="btn" style="background:var(--success); color:white;" onclick="startCall()">📞 FaceTime</button>
             </div>
-            <div style="display:flex; gap:10px; margin-bottom:20px;">
-                <button onclick="setNav('add')" style="flex:1; padding:12px; border-radius:12px; border:none; background:var(--primary); color:white; cursor:pointer;">+ Friend</button>
-                <button onclick="openGroupCreator()" style="flex:1; padding:12px; border-radius:12px; border:none; background:var(--white); border:1px solid #ddd; cursor:pointer;">👥 Group</button>
+            <div class="chat-box" id="msgBox"></div>
+            <div id="emojiPanel" class="emoji-panel hidden"></div>
+            <div style="padding:20px; display:flex; gap:10px; align-items:center;">
+                <button onclick="toggleEmojis()" class="btn" style="background:none; font-size:24px;">😊</button>
+                <input type="text" id="msgIn" placeholder="Type a message..." style="flex:1; padding:15px; border-radius:20px; border:1px solid #ddd; outline:none;" oninput="emitTyping()" onkeypress="if(event.key==='Enter')sendMsg()">
+                <button onclick="takeEmojiPhoto()" class="btn" style="background:#eee;">📷</button>
+                <button class="btn" style="background:var(--primary); color:white;" onclick="sendMsg()">Send</button>
             </div>
-            <div class="contact-list" id="contactList" style="flex:1; overflow-y:auto;"></div>
-        </aside>
+        </div>
+    </main>
+</div>
 
-        <main class="main-view glass" style="position:relative; overflow:hidden; display:flex; flex-direction:column;">
-            <div id="chatView" class="hidden" style="height:100%; display:flex; flex-direction:column;">
-                <div style="padding:20px; border-bottom:1px solid rgba(128,128,128,0.1); display:flex; justify-content:space-between; align-items:center;">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <img id="targetPfp" src="" style="width:40px; height:40px; border-radius:12px;">
-                        <h3 id="targetName">Chat</h3>
-                    </div>
-                    <button onclick="startCall()" style="background:var(--success); color:white; border:none; padding:10px 20px; border-radius:12px; cursor:pointer; font-weight:bold;">📞 Start Balling</button>
-                </div>
-                
-                <div class="chat-box" id="msgBox"></div>
-
-                <div id="emojiPanel" class="emoji-panel hidden"></div>
-
-                <div style="padding:20px; display:flex; gap:12px; align-items:center; background:var(--white);">
-                    <button onclick="toggleEmojis()" style="background:none; border:none; font-size:24px; cursor:pointer;">😊</button>
-                    <label style="cursor:pointer; font-size:24px;">📷<input type="file" id="stickerIn" accept="image/*" style="display:none" onchange="sendSticker(this)"></label>
-                    <input type="text" id="msgIn" placeholder="Type something..." style="flex:1; padding:15px; border-radius:15px; border:1px solid #ddd; background:var(--bg); color:var(--text);" onkeypress="if(event.key==='Enter')sendMsg()">
-                    <button onclick="sendMsg()" style="background:var(--primary); color:white; border:none; padding:12px 25px; border-radius:15px; cursor:pointer; font-weight:bold;">Send</button>
-                </div>
-            </div>
-
-            <div id="addView" class="hidden" style="padding:50px;">
-                <h2>Add a Connection</h2>
-                <input type="text" id="friendIdIn" placeholder="Enter ID (000) 000-000" style="width:100%; margin:25px 0; padding:15px; border-radius:12px;">
-                <button onclick="addFriend()" style="width:100%; padding:15px; border-radius:12px; background:var(--primary); color:white; border:none; cursor:pointer;">Add Friend</button>
-            </div>
-        </main>
+<div id="groupModal" class="modal hidden">
+    <div class="glass modal-body">
+        <h3>Create Group</h3>
+        <input type="text" id="groupNameIn" placeholder="Group Name" style="width:100%; padding:12px; margin:15px 0; border-radius:10px;">
+        <div id="groupFriendList" style="text-align:left; max-height:200px; overflow-y:auto; margin-bottom:15px;"></div>
+        <button class="btn" style="background:var(--primary); color:white; width:100%;" onclick="confirmGroup()">Create</button>
+        <button class="btn" style="width:100%; margin-top:10px;" onclick="closeModal('groupModal')">Cancel</button>
     </div>
 </div>
 
 <div id="profileModal" class="modal hidden">
-    <div class="modal-content glass" style="padding:40px; text-align:center;">
-        <h2>Elite Profile</h2>
-        <div style="position:relative; width:100px; height:100px; margin:20px auto;">
-            <img id="editPfp" src="" class="pfp" style="width:100px; height:100px;">
-            <label style="position:absolute; bottom:0; right:0; background:var(--primary); border-radius:50%; padding:5px; cursor:pointer;">✏️<input type="file" onchange="uploadPfp(this)" style="display:none"></label>
+    <div class="glass modal-body">
+        <h3>Edit Profile</h3>
+        <img id="editPfpPreview" src="" class="pfp-large" style="width:100px; height:100px; margin:20px auto; display:block;">
+        <input type="file" id="pfpUpload" hidden onchange="processPfp(this)">
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <button class="btn" style="flex:1; font-size:0.8rem;" onclick="document.getElementById('pfpUpload').click()">Upload Photo</button>
+            <button class="btn" style="flex:1; font-size:0.8rem;" onclick="randomPfp()">Randomize</button>
         </div>
-        <input type="text" id="editName" placeholder="Name" style="width:100%; padding:12px; margin-bottom:20px; border-radius:12px;">
-        <button onclick="toggleTheme()" style="width:100%; padding:12px; margin-bottom:10px; border-radius:12px; border:1px solid #ddd; cursor:pointer;">Toggle Dark Mode</button>
-        <button onclick="saveProfile()" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:12px; margin-bottom:10px;">Save</button>
-        <button onclick="logout()" style="width:100%; padding:12px; background:var(--error); color:white; border:none; border-radius:12px;">Logout</button>
-        <button onclick="closeProfile()" style="margin-top:20px; border:none; background:none; cursor:pointer; color:var(--gray);">Close</button>
+        <input type="text" id="editNameIn" placeholder="Display Name" style="width:100%; padding:12px; border-radius:10px; margin-bottom:20px;">
+        <button class="btn" style="background:var(--primary); color:white; width:100%;" onclick="saveProfile()">Save Changes</button>
+        <button class="btn" style="width:100%; margin-top:10px;" onclick="toggleTheme()">🌓 Toggle Theme</button>
+        <button class="btn" style="width:100%; margin-top:10px; background:var(--error); color:white;" onclick="logout()">Logout</button>
     </div>
 </div>
 
-<div id="groupModal" class="modal hidden">
-    <div class="modal-content glass" style="width:400px; padding:30px;">
-        <h3>Create Group</h3>
-        <input type="text" id="groupNameIn" placeholder="Group Name" style="width:100%; padding:12px; margin:15px 0; border-radius:12px;">
-        <p>Select Friends:</p>
-        <div id="friendSelector" style="max-height:200px; overflow-y:auto; margin:10px 0;"></div>
-        <button onclick="createGroupFinal()" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:12px;">Create</button>
-        <button onclick="this.parentElement.parentElement.classList.add('hidden')" style="width:100%; margin-top:10px; background:none; border:none;">Cancel</button>
-    </div>
-</div>
-
-<div id="callOverlay" class="call-ui hidden">
-    <div class="call-grid" id="callGrid">
-        <div class="v-card" id="localCard">
-            <video id="localVideo" autoplay playsinline muted></video>
-            <img id="localOffPfp" src="" class="v-off hidden">
-            <div class="v-label">You • Mic: <span id="micStatus">On</span></div>
+<div id="callOverlay" class="call-overlay hidden">
+    <div class="video-grid" id="videoGrid">
+        <div class="video-box">
+            <video id="localVideo" autoplay playsinline muted style="width:100%; height:100%; object-fit:cover;"></video>
+            <div id="localFallback" class="fallback-pfp hidden">
+                <img id="callMyPfp" src="" class="pfp-large" style="width:120px; height:120px;">
+                <h2 id="callMyName">You</h2>
+            </div>
+            <div class="mic-label" id="myMicStatus">Mic: On</div>
         </div>
     </div>
-    <div style="height:120px; display:flex; justify-content:center; align-items:center; gap:25px;">
-        <button onclick="toggleMic()" id="micBtn" style="width:60px; height:60px; border-radius:50%; border:none; background:#333; color:white; cursor:pointer;">🎙️</button>
-        <button onclick="toggleCam()" id="camBtn" style="width:60px; height:60px; border-radius:50%; border:none; background:#333; color:white; cursor:pointer;">📷</button>
-        <button onclick="endCall()" style="width:70px; height:70px; border-radius:50%; border:none; background:var(--error); color:white; font-size:24px; cursor:pointer;">✖</button>
+    <div style="height:120px; display:flex; justify-content:center; align-items:center; gap:30px; background:rgba(0,0,0,0.8);">
+        <button onclick="toggleCam()" id="camBtn" class="btn" style="background:#444; color:white;">📷 Cam Off</button>
+        <button onclick="toggleMic()" id="micBtn" class="btn" style="background:#444; color:white;">🎤 Mic Off</button>
+        <button onclick="endCall()" class="btn" style="background:var(--error); color:white; width:80px; height:80px; border-radius:50%; font-size:30px;">✖</button>
     </div>
 </div>
 
@@ -176,44 +172,55 @@
     let db = { users: {}, chats: {} };
     let currUser = JSON.parse(localStorage.getItem('balling_session'));
     let activeId = null;
-    let theme = localStorage.getItem('balling_theme') || 'light';
+    let localStream = null;
     let isMicOn = true;
     let isCamOn = true;
+    let typingTimer;
 
-    // Load App
+    // 100 Emojis Array
+    const EMOJIS = ["🔥","😂","💯","🚀","💎","👑","⚡️","☁️","🥶","🤝","🤫","💸","🧿","🩸","🦍","🦾","🧿","✨","🌊","🔋","🏀","⚽️","🎮","🎲","🎹","🎤","🎧","🎬","🏎","📱","💻","🏠","🪐","🌓","🥑","🍣","🍔","🍻","🍷","🧊","🎈","🧸","🔫","💊","🧼","🧬","🧪","🧲","🚬","⚰️","❤️","💔","🖤","🧡","💚","💙","💜","🤎","🤍","❣️","💕","💞","💓","💗","💖","💘","💝","💟","☮️","✝️","☪️","🕉","☸️","✡️","🔯","🕎","☯️","☦️","🛐","⛎","♈️","♉️","♊️","♋️","♌️","♍️","♎️","♏️","♐️","♑️","♒️","♓️","🆔","⚛️","🉑","☢️","☣️","📴","📳","🈶","🈚️","🈸","🈺","🈷️"];
+
     window.onload = () => {
-        document.documentElement.setAttribute('data-theme', theme);
-        initEmojis();
+        const savedTheme = localStorage.getItem('balling_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        
         setTimeout(() => {
-            document.getElementById('splash').style.opacity = '0';
-            setTimeout(() => document.getElementById('splash').remove(), 1000);
-            if(!currUser) document.getElementById('authView').classList.remove('hidden');
-            else {
-                document.getElementById('appView').classList.remove('hidden');
-                loadDB();
+            const splash = document.getElementById('splash');
+            splash.style.opacity = '0';
+            splash.style.pointerEvents = 'none';
+            
+            if(!currUser) {
+                document.getElementById('authView').classList.remove('hidden');
+            } else {
+                initApp();
             }
-        }, 2500);
+        }, 3000);
     };
+
+    function initApp() {
+        document.getElementById('sidebarView').classList.remove('hidden');
+        document.getElementById('chatAreaView').classList.remove('hidden');
+        loadDB();
+        setInterval(loadDB, 2000);
+        buildEmojiPanel();
+    }
 
     async function loadDB() {
         const { data } = await sb.from('balling_data').select('content').eq('id', 'main_db').single();
         if(data) {
             db = data.content;
-            if(currUser) {
-                const me = db.users[currUser.id];
-                document.getElementById('myNameDisplay').innerText = me.user;
-                document.getElementById('myIdDisplay').innerText = currUser.id;
-                document.getElementById('myPfp').src = me.pfp;
-                document.getElementById('localOffPfp').src = me.pfp;
-                renderContacts();
-                if(activeId) renderMessages();
-            }
+            const me = db.users[currUser.id];
+            document.getElementById('myNameDisplay').innerText = me.user;
+            document.getElementById('myIdDisplay').innerText = "ID: " + currUser.id;
+            document.getElementById('myPfp').src = me.pfp || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currUser.id}`;
+            renderContacts();
+            if(activeId) renderMessages();
         }
     }
 
     async function saveDB() { await sb.from('balling_data').upsert({ id: 'main_db', content: db }); }
 
-    // Auth
+    // AUTH
     async function handleAuth() {
         const u = document.getElementById('userIn').value.trim();
         const p = document.getElementById('passIn').value.trim();
@@ -221,8 +228,8 @@
         await loadDB();
         let id = Object.keys(db.users).find(k => db.users[k].user === u && db.users[k].pass === p);
         if(!id) {
-            id = `(${Math.floor(Math.random()*899)+100}) ${Math.floor(Math.random()*899)+100}-${Math.floor(Math.random()*899)+100}`;
-            db.users[id] = { user: u, pass: p, friends: {}, pfp: `https://api.dicebear.com/7.x/avataaars/svg?seed=${u}`, groups: [] };
+            id = `(${Math.floor(100+Math.random()*800)}) ${Math.floor(100+Math.random()*800)}-${Math.floor(1000+Math.random()*8000)}`;
+            db.users[id] = { user: u, pass: p, friends: {}, pfp: `https://api.dicebear.com/7.x/avataaars/svg?seed=${u}`, typing: false };
             await saveDB();
         }
         currUser = { id, name: u };
@@ -232,162 +239,181 @@
 
     function logout() { localStorage.removeItem('balling_session'); location.reload(); }
 
-    // Profile & PFP Upload
+    // PROFILE MGT
     function openProfile() {
         const me = db.users[currUser.id];
-        document.getElementById('editPfp').src = me.pfp;
-        document.getElementById('editName').value = me.user;
+        document.getElementById('editPfpPreview').src = me.pfp;
+        document.getElementById('editNameIn').value = me.user;
         document.getElementById('profileModal').classList.remove('hidden');
     }
-    function closeProfile() { document.getElementById('profileModal').classList.add('hidden'); }
-    
-    function uploadPfp(el) {
+
+    function processPfp(input) {
         const reader = new FileReader();
-        reader.onload = (e) => {
-            document.getElementById('editPfp').src = e.target.result;
-        };
-        reader.readAsDataURL(el.files[0]);
+        reader.onload = (e) => document.getElementById('editPfpPreview').src = e.target.result;
+        reader.readAsDataURL(input.files[0]);
+    }
+
+    function randomPfp() {
+        const types = ['avataaars', 'pixel-art', 'big-smile', 'bottts'];
+        const rand = types[Math.floor(Math.random()*types.length)];
+        document.getElementById('editPfpPreview').src = `https://api.dicebear.com/7.x/${rand}/svg?seed=${Math.random()}`;
     }
 
     async function saveProfile() {
-        db.users[currUser.id].user = document.getElementById('editName').value;
-        db.users[currUser.id].pfp = document.getElementById('editPfp').src;
+        db.users[currUser.id].user = document.getElementById('editNameIn').value;
+        db.users[currUser.id].pfp = document.getElementById('editPfpPreview').src;
         await saveDB();
-        location.reload();
+        closeModal('profileModal');
     }
 
-    function toggleTheme() {
-        theme = theme === 'light' ? 'dark' : 'light';
-        localStorage.setItem('balling_theme', theme);
-        document.documentElement.setAttribute('data-theme', theme);
-    }
-
-    // Emoji Logic
-    function initEmojis() {
-        const panel = document.getElementById('emojiPanel');
-        const emojis = ["🔥","💎","🏀","👑","⚡️","💯","🚀","😂","💀","🫠","🫡","🤙","💨","🥶","🥵","🤑","🦾","🧿","🧢","🦍","🌊","🎬","💸","🥇","📈","🛸","👾","❤️","✨","✅","❌","⚠️","🆘","🔞","💬","🔊","🔔","💭","🃏","🎴","🎵","🎶","🎨","🎭","🎷","🎺","🎸","🎻","🎹","🪕","🎳","🏏","🏑","🏒","🏓","🏸","🥊","🥋","🥅","⛳️","⛸","🎣","🤿","🎿","🏂","🏋️","🤺","🏇","🚴","🚵","🏆","🥇","🥈","🥉","🏅","🎖","🎗","🎫","🎟","🎪","🎭","🖼","🎨","🎬","🎤","🎧","🎼","🎹","🥁","🪗","🎲","🧩","🧸","🪅","🪆","🪄","🪄","🎊","🎉","🎈","🎏","🎐","🧧","🎀","🎁","🧨","🪄"];
-        panel.innerHTML = emojis.map(e => `<button class="emoji-btn" onclick="addEmoji('${e}')">${e}</button>`).join('');
-    }
-    function toggleEmojis() { document.getElementById('emojiPanel').classList.toggle('hidden'); }
-    function addEmoji(e) { 
-        document.getElementById('msgIn').value += e; 
-        document.getElementById('emojiPanel').classList.add('hidden');
-    }
-
-    async function sendSticker(el) {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            if(!db.chats[activeId]) db.chats[activeId] = [];
-            db.chats[activeId].push({ s: currUser.id, type: 'sticker', content: e.target.result, d: Date.now(), u: currUser.name });
-            await saveDB();
-            renderMessages();
-        };
-        reader.readAsDataURL(el.files[0]);
-    }
-
-    // Messaging
-    async function sendMsg() {
-        const input = document.getElementById('msgIn');
-        if(!input.value.trim() || !activeId) return;
-        if(!db.chats[activeId]) db.chats[activeId] = [];
-        db.chats[activeId].push({ s: currUser.id, type: 'text', content: input.value, d: Date.now(), u: currUser.name });
-        input.value = "";
-        renderMessages();
-        await saveDB();
-    }
-
-    function renderMessages() {
-        const msgs = db.chats[activeId] || [];
-        document.getElementById('msgBox').innerHTML = msgs.map(m => `
-            <div class="bubble ${m.s === currUser.id ? 'me' : 'them'}">
-                <small style="font-size:0.6rem; display:block; opacity:0.7;">${m.u}</small>
-                ${m.type === 'text' ? m.content : `<img src="${m.content}" class="sticker">`}
-                <span style="font-size:0.5rem; display:block; text-align:right; margin-top:3px;">${new Date(m.d).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
-            </div>
-        `).join('');
-        document.getElementById('msgBox').scrollTop = document.getElementById('msgBox').scrollHeight;
-    }
-
-    // Groups
-    function openGroupCreator() {
-        const container = document.getElementById('friendSelector');
-        const friends = db.users[currUser.id].friends;
-        container.innerHTML = Object.keys(friends).map(fid => `
-            <div style="padding:10px; display:flex; align-items:center; gap:10px;">
-                <input type="checkbox" class="grp-check" value="${fid}"> 
-                <label>${friends[fid]}</label>
-            </div>
-        `).join('');
-        document.getElementById('groupModal').classList.remove('hidden');
-    }
-
-    async function createGroupFinal() {
-        const name = document.getElementById('groupNameIn').value;
-        const selected = Array.from(document.querySelectorAll('.grp-check:checked')).map(c => c.value);
-        if(!name || selected.length === 0) return;
-        const gid = "GRP-" + Date.now();
-        db.users[currUser.id].friends[gid] = "👥 " + name;
-        db.chats[gid] = [{ s: 'system', type: 'text', content: 'Group Created', d: Date.now(), u: 'System' }];
-        await saveDB();
-        location.reload();
-    }
-
-    // Contacts
+    // CHAT ENGINE
     function renderContacts() {
         const container = document.getElementById('contactList');
         const friends = db.users[currUser.id].friends || {};
         container.innerHTML = Object.keys(friends).map(fid => `
-            <div class="nav-item ${activeId === fid ? 'active' : ''}" onclick="openChat('${fid}')" style="display:flex; align-items:center; gap:12px; padding:15px; margin-bottom:8px; border-radius:15px; cursor:pointer; background:var(--white);">
-                <img src="${fid.includes('GRP') ? 'https://api.dicebear.com/7.x/identicon/svg?seed='+fid : db.users[fid]?.pfp}" style="width:35px; height:35px; border-radius:10px;">
-                <div style="overflow:hidden"><strong style="display:block; text-overflow:ellipsis; white-space:nowrap; overflow:hidden;">${friends[fid]}</strong></div>
+            <div class="contact-item ${activeId === fid ? 'active' : ''}" onclick="openChat('${fid}')">
+                <img src="${fid.startsWith('GRP') ? 'https://api.dicebear.com/7.x/initials/svg?seed='+friends[fid] : (db.users[fid]?.pfp || '')}" class="pfp-large" style="width:40px; height:40px;">
+                <div style="flex:1">
+                    <strong>${friends[fid]}</strong>
+                    ${db.users[fid]?.typing ? '<br><small style="color:white;">Typing...</small>' : ''}
+                </div>
             </div>
         `).join('');
     }
 
     function openChat(id) {
         activeId = id;
-        document.getElementById('chatView').classList.remove('hidden');
-        document.getElementById('addView').classList.add('hidden');
+        document.getElementById('noChat').classList.add('hidden');
+        document.getElementById('activeChat').classList.remove('hidden');
         document.getElementById('targetName').innerText = db.users[currUser.id].friends[id];
-        document.getElementById('targetPfp').src = id.includes('GRP') ? 'https://api.dicebear.com/7.x/identicon/svg?seed='+id : db.users[id]?.pfp;
         renderMessages();
     }
 
-    async function addFriend() {
-        const id = document.getElementById('friendIdIn').value.trim();
-        if(db.users[id]) {
-            db.users[currUser.id].friends[id] = db.users[id].user;
-            await saveDB();
-            location.reload();
-        } else alert("ID not found");
+    async function sendMsg() {
+        const input = document.getElementById('msgIn');
+        if(!input.value.trim()) return;
+        if(!db.chats[activeId]) db.chats[activeId] = [];
+        db.chats[activeId].push({
+            id: Date.now(),
+            s: currUser.id,
+            u: db.users[currUser.id].user,
+            t: input.value,
+            d: Date.now(),
+            seen: false
+        });
+        input.value = "";
+        db.users[currUser.id].typing = false;
+        await saveDB();
+        renderMessages();
     }
 
-    function setNav(v) {
-        document.getElementById('chatView').classList.add('hidden');
-        document.getElementById('addView').classList.remove('hidden');
+    function renderMessages() {
+        const msgs = db.chats[activeId] || [];
+        let html = "";
+        msgs.forEach(m => {
+            if(m.s !== currUser.id && !m.seen) m.seen = true;
+            html += `
+                <div class="bubble ${m.s === currUser.id ? 'me' : 'them'}">
+                    ${activeId.startsWith('GRP') ? `<small style="display:block; font-weight:bold; font-size:0.7rem;">${m.u}</small>` : ''}
+                    ${m.t}
+                    <div style="display:flex; justify-content:flex-end; align-items:center; gap:5px; margin-top:5px;">
+                        <span style="font-size:0.6rem; opacity:0.6;">${new Date(m.d).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                        ${m.s === currUser.id ? `<span class="seen-tick">${m.seen ? '✔️✔️' : '✔️'}</span>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        document.getElementById('msgBox').innerHTML = html;
+        document.getElementById('msgBox').scrollTop = document.getElementById('msgBox').scrollHeight;
     }
 
-    // Advanced Calling
-    let localStream;
+    function emitTyping() {
+        db.users[currUser.id].typing = true;
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => {
+            db.users[currUser.id].typing = false;
+            saveDB();
+        }, 2000);
+    }
+
+    // EMOJI PANEL
+    function buildEmojiPanel() {
+        const panel = document.getElementById('emojiPanel');
+        panel.innerHTML = EMOJIS.map(e => `<button class="emoji-btn" onclick="addEmoji('${e}')">${e}</button>`).join('');
+    }
+    function toggleEmojis() { document.getElementById('emojiPanel').classList.toggle('hidden'); }
+    function addEmoji(e) { document.getElementById('msgIn').value += e; }
+    
+    async function takeEmojiPhoto() {
+        const stream = await navigator.mediaDevices.getUserMedia({video:true});
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.play();
+        setTimeout(() => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 100; canvas.height = 100;
+            canvas.getContext('2d').drawImage(video, 0, 0, 100, 100);
+            const img = canvas.toDataURL('image/webp');
+            document.getElementById('msgIn').value += ` [CustomEmoji:${img.substring(20, 30)}] `;
+            stream.getTracks().forEach(t => t.stop());
+            sendMsg();
+        }, 1000);
+    }
+
+    // GROUP FLOW
+    function openGroupCreator() {
+        const friends = db.users[currUser.id].friends;
+        document.getElementById('groupFriendList').innerHTML = Object.keys(friends)
+            .filter(f => !f.startsWith('GRP'))
+            .map(f => `
+                <label style="display:block; padding:10px;">
+                    <input type="checkbox" value="${f}" class="group-select"> ${friends[f]}
+                </label>
+            `).join('');
+        document.getElementById('groupModal').classList.remove('hidden');
+    }
+
+    async function confirmGroup() {
+        const name = document.getElementById('groupNameIn').value;
+        const selected = Array.from(document.querySelectorAll('.group-select:checked')).map(i => i.value);
+        if(!name || selected.length === 0) return;
+        
+        const gid = "GRP-" + Date.now();
+        db.users[currUser.id].friends[gid] = name;
+        db.chats[gid] = [{ s: 'sys', u: 'Balling', t: `Group ${name} Created`, d: Date.now(), seen: true }];
+        
+        // Add everyone to group
+        selected.forEach(fid => {
+            if(db.users[fid]) db.users[fid].friends[gid] = name;
+        });
+        
+        await saveDB();
+        closeModal('groupModal');
+    }
+
+    // CALLING
     async function startCall() {
         document.getElementById('callOverlay').classList.remove('hidden');
+        document.getElementById('callMyPfp').src = db.users[currUser.id].pfp;
+        document.getElementById('callMyName').innerText = db.users[currUser.id].user;
+        
         localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
         document.getElementById('localVideo').srcObject = localStream;
-    }
-
-    function toggleMic() {
-        isMicOn = !isMicOn;
-        localStream.getAudioTracks()[0].enabled = isMicOn;
-        document.getElementById('micStatus').innerText = isMicOn ? "On" : "Off";
-        document.getElementById('micBtn').style.background = isMicOn ? "#333" : "var(--error)";
     }
 
     function toggleCam() {
         isCamOn = !isCamOn;
         localStream.getVideoTracks()[0].enabled = isCamOn;
         document.getElementById('localVideo').classList.toggle('hidden', !isCamOn);
-        document.getElementById('localOffPfp').classList.toggle('hidden', isCamOn);
-        document.getElementById('camBtn').style.background = isCamOn ? "#333" : "var(--error)";
+        document.getElementById('localFallback').classList.toggle('hidden', isCamOn);
+        document.getElementById('camBtn').innerText = isCamOn ? "📷 Cam Off" : "📷 Cam On";
+    }
+
+    function toggleMic() {
+        isMicOn = !isMicOn;
+        localStream.getAudioTracks()[0].enabled = isMicOn;
+        document.getElementById('myMicStatus').innerText = "Mic: " + (isMicOn ? "On" : "Off");
+        document.getElementById('micBtn').innerText = isMicOn ? "🎤 Mic Off" : "🎤 Mic On";
     }
 
     function endCall() {
@@ -395,7 +421,20 @@
         document.getElementById('callOverlay').classList.add('hidden');
     }
 
-    setInterval(loadDB, 5000);
+    function toggleTheme() {
+        const t = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+        localStorage.setItem('balling_theme', t);
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    function openAddFriend() {
+        const id = prompt("Enter Friend's ID:");
+        if(id && db.users[id]) {
+            db.users[currUser.id].friends[id] = db.users[id].user;
+            saveDB();
+        } else if(id) { alert("ID not found!"); }
+    }
 </script>
 </body>
 </html>
