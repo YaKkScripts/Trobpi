@@ -21,27 +21,38 @@
         .sidebar { display: flex; flex-direction: column; padding: 15px; overflow: hidden; }
         .contact-list { overflow-y: auto; flex: 1; margin-top: 10px; }
         .user-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; }
+        
         .nav-item { padding: 12px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; transition: 0.2s; background: white; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;}
         .nav-item.active { border-left: 5px solid var(--primary); background: #e0f7fa; }
         .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--gray); }
         .status-dot.online { background: var(--success); box-shadow: 0 0 5px var(--success); }
-        .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #fafafa; }
-        .bubble { max-width: 75%; padding: 12px 16px; border-radius: 18px; font-size: 0.95rem; position: relative; }
+
+        .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #fafafa; border: 2px dashed transparent; transition: 0.3s; }
+        .chat-box.drag-over { background: #e0f7fa; border-color: var(--primary); }
+        
+        .bubble { max-width: 75%; padding: 12px 16px; border-radius: 18px; font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; }
+        .bubble img, .bubble video { max-width: 100%; border-radius: 10px; margin-top: 5px; display: block; }
         .bubble.me { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 2px; }
         .bubble.them { align-self: flex-start; background: #eee; color: #222; border-bottom-left-radius: 2px; }
+        .bubble a { color: #fff; text-decoration: underline; }
+        .bubble.them a { color: var(--primary); }
+
         .input-area { padding: 15px; display: flex; gap: 10px; background: white; border-top: 1px solid #eee; }
         input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid #ddd; outline: none; }
         .btn { padding: 10px 20px; border-radius: 25px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; }
         .btn-main { background: var(--primary); color: white; }
         .btn-danger { background: #ff5252; color: white; }
         
-        /* Video Call Layout */
+        /* New Call Notification Toast */
+        #callToast { position: fixed; bottom: 20px; left: 20px; z-index: 4000; width: 300px; padding: 20px; color: white; background: #333; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transform: translateY(150%); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #callToast.show { transform: translateY(0); }
+
         .call-overlay { position: fixed; inset: 0; background: #000; z-index: 3000; display: flex; flex-direction: column; }
         .video-grid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px; }
-        .video-wrapper { position: relative; background: #222; border-radius: 20px; overflow: hidden; }
-        video { width: 100%; height: 100%; object-fit: cover; }
+        .video-wrapper { position: relative; background: #222; border-radius: 20px; overflow: hidden; border: 2px solid rgba(255,255,255,0.1); }
+        video { width: 100%; height: 100%; object-fit: cover; background: #111; }
         .video-label { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.5); color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; }
-        .call-controls { height: 100px; display: flex; justify-content: center; align-items: center; gap: 20px; background: rgba(255,255,255,0.1); }
+        .call-controls { height: 100px; display: flex; justify-content: center; align-items: center; gap: 20px; background: rgba(255,255,255,0.05); }
     </style>
 </head>
 <body>
@@ -52,14 +63,11 @@
             <h1 style="color: var(--primary); margin-bottom: 20px;">Balling.com</h1>
             <input type="text" id="userIn" placeholder="Username" style="width: 100%; margin-bottom: 10px;">
             <input type="password" id="passIn" placeholder="Password" style="width: 100%; margin-bottom: 10px;">
-            
             <div id="signupMsg" class="hidden" style="background: #e0f7fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-                <small>Your Universal ID (Share this):</small><br>
-                <strong id="newIdDisplay" style="color: var(--primary-dark);"></strong>
+                <small>Universal ID:</small><br><strong id="newIdDisplay" style="color: var(--primary-dark);"></strong>
             </div>
-
             <button class="btn btn-main" id="authBtn" style="width: 100%;" onclick="handleAuth()">Create Account</button>
-            <p style="margin-top: 15px;"><a href="javascript:void(0)" id="toggleLink" onclick="toggleAuth()">Already have an account? Login</a></p>
+            <p style="margin-top: 15px;"><a href="javascript:void(0)" id="toggleLink" onclick="toggleAuth()">Login</a></p>
         </div>
     </div>
 
@@ -69,7 +77,6 @@
                 <h3 id="myName">User</h3>
                 <small id="myId">ID</small>
                 <div style="display:flex; gap:5px; margin-top:10px;">
-                    <button class="btn" style="flex:1; font-size:0.7rem; background:rgba(255,255,255,0.2); color:white;" onclick="setNav('mail')">Mailbox</button>
                     <button class="btn" style="flex:1; font-size:0.7rem; background:rgba(255,255,255,0.2); color:white;" onclick="logout()">Logout</button>
                 </div>
             </div>
@@ -79,35 +86,35 @@
 
         <main class="main-view glass" style="position:relative; overflow:hidden;">
             <div id="chatDefault" style="text-align:center; margin-top:25%; color:var(--gray);">
-                <h2>Balling Cloud</h2><p>Select a baller to start</p>
+                <h2>Balling Cloud</h2><p>Drop files here or select a friend</p>
             </div>
 
             <div id="chatView" class="hidden" style="height:100%; display:flex; flex-direction:column;">
                 <div style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
                     <h3 id="targetName">Friend</h3>
-                    <div style="display:flex; gap:10px;">
-                        <button class="btn btn-main" onclick="initiateCall()">📞 Call</button>
-                        <button class="btn btn-danger" style="padding:5px 15px;" onclick="blockUser()">Block</button>
-                    </div>
+                    <button class="btn btn-main" onclick="initiateCall()">📞 Call</button>
                 </div>
-                <div class="chat-box" id="msgBox"></div>
+                <div class="chat-box" id="msgBox" ondragover="event.preventDefault(); this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event)"></div>
                 <div class="input-area">
-                    <input type="text" id="msgIn" placeholder="Type a message..." onkeypress="if(event.key==='Enter')sendMsg()">
+                    <input type="text" id="msgIn" placeholder="Message or Link..." onkeypress="if(event.key==='Enter')sendMsg()">
                     <button class="btn btn-main" onclick="sendMsg()">Send</button>
                 </div>
             </div>
 
-            <div id="mailView" class="hidden" style="padding:30px;">
-                <h2>Mailbox</h2>
-                <div id="mailItems" style="margin-top:20px;"></div>
-            </div>
-
             <div id="addView" class="hidden" style="padding:40px;">
-                <h2>Add New Friend</h2>
+                <h2>Add Friend</h2>
                 <input type="text" id="friendIdIn" placeholder="(000) 000-000" style="width:100%; margin-top:20px;">
-                <button class="btn btn-main" style="width:100%; margin-top:10px;" onclick="addFriend()">Connect ID</button>
+                <button class="btn btn-main" style="width:100%; margin-top:10px;" onclick="addFriend()">Connect</button>
             </div>
         </main>
+    </div>
+</div>
+
+<div id="callToast">
+    <div style="margin-bottom: 15px;"><strong id="callerNameTag">User</strong> is Calling!</div>
+    <div style="display: flex; gap: 10px;">
+        <button class="btn btn-main" style="flex:1; background: var(--success);" onclick="acceptCall()">Accept</button>
+        <button class="btn btn-danger" style="flex:1;" onclick="declineCall()">Decline</button>
     </div>
 </div>
 
@@ -119,13 +126,13 @@
         </div>
         <div class="video-wrapper">
             <video id="remoteVideo" autoplay playsinline></video>
-            <div class="video-label" id="remoteLabel">Friend</div>
+            <div class="video-label" id="remoteLabel">User</div>
         </div>
     </div>
     <div class="call-controls">
         <button class="btn btn-main" id="micBtn" onclick="toggleMic()">Mic: ON</button>
         <button class="btn btn-main" id="camBtn" onclick="toggleCam()">Cam: ON</button>
-        <button class="btn btn-danger" onclick="endCall()">End Call</button>
+        <button class="btn btn-danger" style="border-radius: 50%; width: 60px; height:60px; padding:0;" onclick="endCall()">✖</button>
     </div>
 </div>
 
@@ -137,37 +144,30 @@
     let db = { users: {}, chats: {}, calls: {} };
     let currUser = JSON.parse(localStorage.getItem('balling_session'));
     let activeId = null;
-    let isLogin = false;
     let localStream = null;
+    let callData = null;
 
-    // --- AUTH LOGIC ---
+    // --- AUTH ---
     function toggleAuth() {
-        isLogin = !isLogin;
-        document.getElementById('authBtn').innerText = isLogin ? "Login" : "Create Account";
-        document.getElementById('toggleLink').innerText = isLogin ? "Need an account? Sign Up" : "Already have an account? Login";
-        document.getElementById('signupMsg').classList.add('hidden');
+        const btn = document.getElementById('authBtn');
+        btn.innerText = btn.innerText === "Login" ? "Create Account" : "Login";
     }
 
     async function handleAuth() {
         const u = document.getElementById('userIn').value.trim();
         const p = document.getElementById('passIn').value.trim();
-        if(!u || !p) return alert("Fill everything!");
-
+        const mode = document.getElementById('authBtn').innerText;
         await loadDB();
-
-        if(!isLogin) {
-            // Sign Up
+        if(mode === "Create Account") {
             const id = `(${Math.floor(Math.random()*899)+100}) ${Math.floor(Math.random()*899)+100}-${Math.floor(Math.random()*899)+100}`;
-            db.users[id] = { user: u, pass: p, friends: {}, blocks: [], seen: Date.now() };
+            db.users[id] = { user: u, pass: p, friends: {}, seen: Date.now() };
             document.getElementById('newIdDisplay').innerText = id;
             document.getElementById('signupMsg').classList.remove('hidden');
-            document.getElementById('authBtn').innerText = "Enter Balling";
             document.getElementById('authBtn').onclick = () => login(id);
             await saveDB();
         } else {
-            // Login
             const id = Object.keys(db.users).find(k => db.users[k].user === u && db.users[k].pass === p);
-            if(id) login(id); else alert("Wrong details!");
+            if(id) login(id); else alert("Invalid Login");
         }
     }
 
@@ -176,10 +176,9 @@
         localStorage.setItem('balling_session', JSON.stringify(currUser));
         location.reload();
     }
-
     function logout() { localStorage.removeItem('balling_session'); location.reload(); }
 
-    // --- DATA SYNC ---
+    // --- SYNC ---
     async function loadDB() {
         const { data } = await sb.from('balling_data').select('content').eq('id', 'main_db').single();
         if(data) {
@@ -188,136 +187,140 @@
                 db.users[currUser.id].seen = Date.now();
                 renderContacts();
                 if(activeId) renderMessages();
-                checkCalls();
+                checkIncomingCalls();
             }
         }
     }
+    async function saveDB() { await sb.from('balling_data').upsert({ id: 'main_db', content: db }); }
 
-    async function saveDB() {
-        await sb.from('balling_data').upsert({ id: 'main_db', content: db });
-    }
-
-    // --- UI LOGIC ---
-    function setNav(v) {
-        document.getElementById('chatDefault').classList.add('hidden');
-        document.getElementById('chatView').classList.add('hidden');
-        document.getElementById('mailView').classList.add('hidden');
-        document.getElementById('addView').classList.add('hidden');
-        
-        if(v === 'add') document.getElementById('addView').classList.remove('hidden');
-        if(v === 'mail') {
-            document.getElementById('mailView').classList.remove('hidden');
-            renderMail();
-        }
-    }
-
-    function renderContacts() {
-        const container = document.getElementById('contactList');
-        const friends = db.users[currUser.id].friends || {};
-        container.innerHTML = Object.keys(friends).map(fid => {
-            const isOnline = (Date.now() - (db.users[fid]?.seen || 0)) < 10000;
-            return `
-                <div class="nav-item ${activeId === fid ? 'active' : ''}" onclick="openChat('${fid}')">
-                    <div><strong>${friends[fid]}</strong><br><small>${fid}</small></div>
-                    <div class="status-dot ${isOnline ? 'online' : ''}"></div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    function openChat(id) {
-        activeId = id;
-        setNav('');
-        document.getElementById('chatView').classList.remove('hidden');
-        document.getElementById('targetName').innerText = db.users[id].user;
-        renderMessages();
-    }
-
-    async function addFriend() {
-        const id = document.getElementById('friendIdIn').value.trim();
-        if(db.users[id]) {
-            db.users[currUser.id].friends[id] = db.users[id].user;
-            await saveDB();
-            alert("Added!");
-            setNav('default');
-        } else alert("ID not found!");
-    }
-
-    // --- MESSAGES ---
-    async function sendMsg() {
+    // --- MESSAGING & MEDIA ---
+    function sendMsg(mediaData = null, type = 'text') {
         const input = document.getElementById('msgIn');
-        if(!input.value.trim() || !activeId) return;
+        let content = mediaData || input.value.trim();
+        if(!content || !activeId) return;
+
         const chan = [currUser.id, activeId].sort().join('_');
         if(!db.chats[chan]) db.chats[chan] = [];
-        db.chats[chan].push({ s: currUser.id, t: input.value, d: Date.now() });
+        db.chats[chan].push({ s: currUser.id, t: content, type: type, d: Date.now() });
         input.value = "";
+        saveDB();
         renderMessages();
-        await saveDB();
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        document.getElementById('msgBox').classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const type = file.type.startsWith('image/') ? 'img' : file.type.startsWith('video/') ? 'vid' : 'text';
+            sendMsg(event.target.result, type);
+        };
+        reader.readAsDataURL(file);
     }
 
     function renderMessages() {
         const chan = [currUser.id, activeId].sort().join('_');
         const msgs = db.chats[chan] || [];
-        document.getElementById('msgBox').innerHTML = msgs.map(m => `
-            <div class="bubble ${m.s === currUser.id ? 'me' : 'them'}">${m.t}</div>
-        `).join('');
-        const box = document.getElementById('msgBox');
-        box.scrollTop = box.scrollHeight;
+        document.getElementById('msgBox').innerHTML = msgs.map(m => {
+            let body = m.t;
+            if(m.type === 'img') body = `<img src="${m.t}">`;
+            else if(m.type === 'vid') body = `<video src="${m.t}" controls></video>`;
+            else if(m.t.startsWith('http')) body = `<a href="${m.t}" target="_blank">${m.t}</a>`;
+            
+            return `<div class="bubble ${m.s === currUser.id ? 'me' : 'them'}">${body}</div>`;
+        }).join('');
+        document.getElementById('msgBox').scrollTop = 99999;
     }
 
-    // --- CALLING SYSTEM ---
+    // --- CALLING (RTC SIMULATION) ---
     async function initiateCall() {
-        document.getElementById('callOverlay').classList.remove('hidden');
-        localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
-        document.getElementById('localVideo').srcObject = localStream;
-        
-        db.calls[activeId] = { from: currUser.id, name: currUser.name, active: true };
+        callData = { to: activeId, from: currUser.id, name: currUser.name };
+        db.calls[activeId] = { ...callData, status: 'ringing' };
         await saveDB();
+        showStream();
     }
 
-    function checkCalls() {
-        if(db.calls[currUser.id] && db.calls[currUser.id].active) {
-            const caller = db.calls[currUser.id];
-            if(confirm("Incoming call from " + caller.name)) {
-                acceptCall();
-            }
-            delete db.calls[currUser.id];
-            saveDB();
+    function checkIncomingCalls() {
+        const myCall = db.calls[currUser.id];
+        if(myCall && myCall.status === 'ringing') {
+            document.getElementById('callerNameTag').innerText = myCall.name;
+            document.getElementById('callToast').classList.add('show');
+            callData = myCall;
         }
     }
 
     async function acceptCall() {
+        document.getElementById('callToast').classList.remove('show');
+        showStream();
+        db.calls[currUser.id].status = 'connected';
+        await saveDB();
+    }
+
+    async function declineCall() {
+        document.getElementById('callToast').classList.remove('show');
+        delete db.calls[currUser.id];
+        await saveDB();
+    }
+
+    async function showStream() {
         document.getElementById('callOverlay').classList.remove('hidden');
-        localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
-        document.getElementById('localVideo').srcObject = localStream;
-    }
-
-    function toggleMic() {
-        const audio = localStream.getAudioTracks()[0];
-        audio.enabled = !audio.enabled;
-        document.getElementById('micBtn').innerText = `Mic: ${audio.enabled ? 'ON' : 'OFF'}`;
-    }
-
-    function toggleCam() {
-        const video = localStream.getVideoTracks()[0];
-        video.enabled = !video.enabled;
-        document.getElementById('camBtn').innerText = `Cam: ${video.enabled ? 'ON' : 'OFF'}`;
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
+            document.getElementById('localVideo').srcObject = localStream;
+            // In a real RTC app, here you would exchange ice candidates
+        } catch(e) { alert("Camera Error"); }
     }
 
     function endCall() {
         if(localStream) localStream.getTracks().forEach(t => t.stop());
         document.getElementById('callOverlay').classList.add('hidden');
+        if(callData) delete db.calls[callData.to || callData.from];
+        saveDB();
     }
 
-    // --- INIT ---
+    // --- UI HELPERS ---
+    function setNav(v) {
+        document.getElementById('chatView').classList.toggle('hidden', v !== 'chat');
+        document.getElementById('addView').classList.toggle('hidden', v !== 'add');
+        document.getElementById('chatDefault').classList.toggle('hidden', v !== 'default');
+    }
+
+    function openChat(id) {
+        activeId = id;
+        document.getElementById('targetName').innerText = db.users[id].user;
+        setNav('chat');
+        renderMessages();
+    }
+
+    function renderContacts() {
+        const container = document.getElementById('contactList');
+        const friends = db.users[currUser.id].friends || {};
+        container.innerHTML = Object.keys(friends).map(fid => `
+            <div class="nav-item ${activeId === fid ? 'active' : ''}" onclick="openChat('${fid}')">
+                <div><strong>${friends[fid]}</strong><br><small>${fid}</small></div>
+                <div class="status-dot ${(Date.now()-db.users[fid].seen < 10000) ? 'online' : ''}"></div>
+            </div>
+        `).join('');
+    }
+
+    async function addFriend() {
+        const id = document.getElementById('friendIdIn').value.trim();
+        if(db.users[id] && id !== currUser.id) {
+            db.users[currUser.id].friends[id] = db.users[id].user;
+            await saveDB();
+            setNav('default');
+        }
+    }
+
     if(currUser) {
         document.getElementById('authView').classList.add('hidden');
         document.getElementById('appView').classList.remove('hidden');
         document.getElementById('myName').innerText = currUser.name;
         document.getElementById('myId').innerText = currUser.id;
+        setInterval(loadDB, 3000);
     }
-
-    setInterval(loadDB, 3000);
 </script>
 </body>
 </html>
