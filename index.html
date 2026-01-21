@@ -18,7 +18,6 @@
         .app-shell { display: flex; width: 100vw; height: 100vh; padding: 15px; gap: 15px; }
         .panel { background: var(--white); border-radius: 25px; border: 2px solid var(--border); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,229,255,0.1); }
         
-        /* Sidebar */
         .sidebar { width: 340px; flex-shrink: 0; }
         .profile-btn { 
             padding: 25px; 
@@ -40,7 +39,6 @@
         .item:hover { background: #f0fdfa; border-color: var(--cyan); }
         .item.active { background: var(--cyan); color: white; }
 
-        /* Chat Window */
         .main-view { flex: 1; }
         .header { padding: 20px 30px; border-bottom: 2px solid var(--border); display: flex; align-items: center; gap: 15px; background: var(--white); }
         .msg-display { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: #fafdfd; }
@@ -48,7 +46,6 @@
         .bubble.me { align-self: flex-end; background: var(--cyan); color: white; border-bottom-right-radius: 4px; }
         .bubble.them { align-self: flex-start; background: white; color: var(--text); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
 
-        /* Modals */
         .overlay { position: fixed; inset: 0; background: rgba(0, 229, 255, 0.15); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
         .modal { background: var(--white); width: 90%; max-width: 400px; padding: 40px; border-radius: 35px; border: 3px solid var(--cyan); text-align: center; }
         input { width: 100%; padding: 16px; margin: 10px 0; border: 2px solid var(--border); border-radius: 15px; font-size: 16px; outline: none; transition: 0.2s; }
@@ -69,8 +66,8 @@
             <div style="display:flex; align-items:center; gap:15px;">
                 <img id="myAvatar" src="" class="avatar">
                 <div style="flex:1">
-                    <h3 id="myName" style="font-size: 20px; color: var(--text);">---</h3>
-                    <p id="myId" style="color: var(--cyan-dark); font-weight: 800; font-size: 14px;">ID: Loading...</p>
+                    <h3 id="myName" style="font-size: 20px; color: var(--text);">Loading...</h3>
+                    <p id="myId" style="color: var(--cyan-dark); font-weight: 800; font-size: 14px;">ID: ----</p>
                 </div>
             </div>
         </div>
@@ -138,26 +135,38 @@
     window.onload = async () => {
         await sync();
         document.getElementById('splash').style.display = 'none';
-        if(!session) {
-            document.getElementById('authModal').classList.remove('hidden');
+        
+        if(session && db.users && db.users[session.id]) {
+            startApp();
         } else {
-            init();
+            document.getElementById('authModal').classList.remove('hidden');
         }
     };
 
     async function sync() {
-        const { data } = await sb.from('balling_data').select('content').eq('id', 'main_db').single();
-        if(data) db = data.content;
+        try {
+            const { data, error } = await sb.from('balling_data').select('content').eq('id', 'main_db').single();
+            if(data && data.content) {
+                db = data.content;
+                // Ensure base structure exists
+                if(!db.users) db.users = {};
+                if(!db.chats) db.chats = {};
+            }
+        } catch (e) { console.error("Sync error", e); }
     }
 
     async function save() {
-        await sb.from('balling_data').update({ content: db }).eq('id', 'main_db');
+        const { error } = await sb.from('balling_data').update({ content: db }).eq('id', 'main_db');
+        if (error) {
+            console.error("CRITICAL: Save failed. Check Supabase RLS policies.", error);
+            alert("Error saving to database. Are RLS policies disabled?");
+        }
     }
 
     async function auth(type) {
         const u = document.getElementById('userIn').value.trim();
         const p = document.getElementById('passIn').value.trim();
-        if(!u || !p) return;
+        if(!u || !p) return alert("Fill all fields");
 
         let id = Object.keys(db.users).find(k => db.users[k].user.toLowerCase() === u.toLowerCase());
 
@@ -165,24 +174,29 @@
             if(id) return alert("User exists!");
             id = "C-" + Math.floor(1000 + Math.random() * 9000);
             db.users[id] = { user: u, pass: p, pfp: `https://api.dicebear.com/7.x/adventurer/svg?seed=${u}`, friends: [], groups: [] };
-            await save();
+            await save(); 
         } else {
-            if(!id || db.users[id].pass !== p) return alert("Wrong credentials!");
+            if(!id || db.users[id].pass !== p) return alert("Invalid credentials");
         }
 
-        session = { id, user: u };
+        session = { id, user: db.users[id].user };
         localStorage.setItem('connect_session', JSON.stringify(session));
-        location.reload();
+        
+        document.getElementById('authModal').classList.add('hidden');
+        startApp();
     }
 
-    function init() {
+    function startApp() {
         render();
-        setInterval(async () => { await sync(); render(); }, 3000);
+        setInterval(async () => { 
+            await sync(); 
+            render(); 
+        }, 3000);
     }
 
     function render() {
         const me = db.users[session.id];
-        if(!me) return logout();
+        if(!me) return;
 
         document.getElementById('myName').innerText = me.user;
         document.getElementById('myId').innerText = "ID: " + session.id;
@@ -202,7 +216,7 @@
             const f = db.users[fid];
             if(f) {
                 html += `<div class="item ${activeId === fid ? 'active' : ''}" onclick="openChat('${fid}', '${f.user}')">
-                    <img src="${f.pfp}" style="width:40px;height:40px;border-radius:10px;">
+                    <img src="${f.pfp}" style="width:40px;height:40px;border-radius:10px;object-fit:cover;">
                     <b>${f.user}</b>
                 </div>`;
             }
@@ -224,6 +238,7 @@
         if(!input.value.trim()) return;
         if(!db.chats[activeId]) db.chats[activeId] = [];
         db.chats[activeId].push({ s: session.id, u: db.users[session.id].user, t: input.value, d: Date.now() });
+        const val = input.value;
         input.value = "";
         await save();
         drawMsgs();
@@ -258,12 +273,14 @@
     }
 
     function addFriend() {
-        const fid = prompt("Enter User ID:");
+        const fid = prompt("Enter User ID (e.g. C-1234):");
         if(!fid || !db.users[fid] || fid === session.id) return alert("Invalid ID");
         if(!db.users[session.id].friends.includes(fid)) {
             db.users[session.id].friends.push(fid);
+            if(!db.users[fid].friends) db.users[fid].friends = [];
             db.users[fid].friends.push(session.id);
             save();
+            render();
         }
     }
 
@@ -271,9 +288,11 @@
         const n = prompt("Group Name:");
         if(!n) return;
         const gid = n + "_GRP_" + Date.now();
+        if(!db.users[session.id].groups) db.users[session.id].groups = [];
         db.users[session.id].groups.push(gid);
         db.chats[gid] = [];
         save();
+        render();
     }
 
     function closeAll() { document.querySelectorAll('.overlay').forEach(m => m.classList.add('hidden')); }
