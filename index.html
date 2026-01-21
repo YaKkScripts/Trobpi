@@ -17,111 +17,136 @@
             --bg: #0f172a; --white: #1e293b;
             --text: #f1f5f9; --glass-bg: rgba(30, 41, 59, 0.95);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; transition: background 0.3s, color 0.3s; }
         body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
         .hidden { display: none !important; }
 
+        /* Splash Screen */
+        #splash { position: fixed; inset: 0; background: radial-gradient(circle at center, #1e293b, #000); z-index: 30000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s; }
+        .logo-b { font-size: 100px; font-weight: 900; color: #fff; background: linear-gradient(45deg, var(--primary), #00e5ff); width: 160px; height: 160px; display: flex; align-items: center; justify-content: center; border-radius: 40px; box-shadow: 0 0 60px rgba(0, 188, 212, 0.5); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
         /* Layout */
         .container { max-width: 1400px; margin: 0 auto; height: 100vh; display: flex; padding: 15px; gap: 15px; }
-        .glass { background: var(--glass-bg); backdrop-filter: blur(25px); border-radius: 28px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
+        .glass { background: var(--glass-bg); backdrop-filter: blur(20px); border-radius: 28px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         
         /* Sidebar */
         .sidebar { width: 350px; display: flex; flex-direction: column; padding: 15px; }
-        .contact-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 18px; cursor: pointer; margin-bottom: 5px; transition: 0.2s; }
-        .contact-item:hover { background: rgba(0,0,0,0.04); }
+        .contact-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 18px; cursor: pointer; margin-bottom: 5px; position: relative; }
+        .contact-item:hover { background: rgba(0,0,0,0.05); }
         .contact-item.active { background: var(--primary); color: white; }
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; position: absolute; bottom: 12px; left: 42px; border: 2px solid var(--white); }
+        .online { background: var(--success); }
+        .offline { background: var(--gray); }
 
-        /* Messaging */
-        .chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: rgba(0,0,0,0.02); }
-        .bubble { max-width: 75%; padding: 12px 16px; border-radius: 20px; font-size: 0.95rem; cursor: pointer; position: relative; }
+        /* Chat */
+        .chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .bubble { max-width: 75%; padding: 12px 16px; border-radius: 20px; font-size: 0.95rem; line-height: 1.4; }
         .bubble.me { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px; }
         .bubble.them { align-self: flex-start; background: var(--white); border-bottom-left-radius: 4px; border: 1px solid rgba(0,0,0,0.05); }
+        .seen-tick { font-size: 0.7rem; margin-left: 5px; opacity: 0.8; }
 
-        /* Input */
-        .input-group { padding: 15px; display: flex; gap: 10px; background: var(--white); border-top: 1px solid rgba(0,0,0,0.05); }
-        input { border: 1px solid #ddd; outline: none; transition: 0.2s; }
+        /* Emoji Panel */
+        #emojiPanel { height: 250px; display: grid; grid-template-columns: repeat(8, 1fr); overflow-y: auto; padding: 15px; background: var(--white); border-top: 1px solid rgba(0,0,0,0.1); }
+        .emoji-item { cursor: pointer; text-align: center; padding: 8px; font-size: 1.5rem; transition: transform 0.1s; }
+        .emoji-item:hover { transform: scale(1.3); }
+
+        /* Mailbox */
+        .badge { background: var(--error); color: white; border-radius: 10px; padding: 2px 8px; font-size: 0.7rem; position: absolute; right: 10px; }
+        .mail-item { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+
+        /* Buttons & Inputs */
+        input { border: 1px solid rgba(0,0,0,0.1); outline: none; transition: 0.2s; }
         input:focus { border-color: var(--primary); }
-
-        /* Modals */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-card { width: 420px; padding: 30px; border-radius: 30px; background: var(--white); text-align: center; }
-        
-        .btn { padding: 12px; border-radius: 14px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-primary { background: var(--primary); color: white; width: 100%; margin-bottom: 8px; }
-        .btn-ghost { background: #eee; color: #333; width: 100%; }
-        .btn:active { transform: scale(0.98); }
+        .btn { border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
-<div id="splash" style="position:fixed; inset:0; background:#000; z-index:3000; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white;">
-    <div style="background: var(--primary); width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; margin-bottom: 20px;">B</div>
-    <h1 style="letter-spacing: 5px;">BALLING</h1>
-    <p id="loadStatus" style="margin-top: 20px; opacity: 0.6;">Initializing API...</p>
+<div id="splash">
+    <div class="logo-b">B</div>
+    <h1 style="color:white; margin-top:30px; letter-spacing:8px; font-weight:200;">BALLING</h1>
 </div>
 
 <div class="container">
     <div id="authView" class="hidden" style="margin: auto;">
-        <div class="glass" style="padding: 50px; width: 450px; text-align: center;">
-            <h1 style="color:var(--primary); margin-bottom: 30px;">Balling.com</h1>
-            <input type="text" id="userIn" placeholder="Username" style="width:100%; padding:15px; margin-bottom:10px; border-radius:15px;">
-            <input type="text" id="phoneIn" placeholder="Phone Number (ID)" style="width:100%; padding:15px; margin-bottom:10px; border-radius:15px;">
-            <input type="password" id="passIn" placeholder="Password" style="width:100%; padding:15px; margin-bottom:25px; border-radius:15px;">
-            <button class="btn btn-primary" onclick="handleAuth('signup')">Create Account</button>
-            <button class="btn btn-ghost" onclick="handleAuth('login')">Sign In</button>
+        <div class="glass" style="padding: 40px; width: 400px; text-align: center;">
+            <h1 style="color:var(--primary); margin-bottom:10px;">Balling</h1>
+            <p style="opacity: 0.6; margin-bottom: 30px;">Premium Social Connect</p>
+            <input type="text" id="userIn" placeholder="Username" style="width:100%; padding:15px; margin-bottom:10px; border-radius:12px;">
+            <input type="password" id="passIn" placeholder="Password" style="width:100%; padding:15px; margin-bottom:20px; border-radius:12px;">
+            <button class="btn" style="width:100%; padding:15px; background:var(--primary); color:white;" onclick="handleAuth()">Enter the Court</button>
+            <p id="authErr" style="color:var(--error); margin-top:15px; font-size:0.8rem;"></p>
         </div>
     </div>
 
     <aside id="sidebarView" class="glass sidebar hidden">
-        <div onclick="openProfile()" style="background:var(--primary); padding:15px; border-radius:20px; color:white; margin-bottom:10px; cursor:pointer; display: flex; align-items: center;">
-            <img id="myPfp" src="" style="width:40px; height:40px; border-radius:50%; margin-right:12px; object-fit: cover; border: 2px solid white;">
-            <div>
-                <div id="myNameDisplay" style="font-weight: bold;">User</div>
-                <div style="font-size: 10px; opacity: 0.8;">Online</div>
+        <div style="background:linear-gradient(135deg, var(--primary), var(--primary-dark)); padding:20px; border-radius:22px; color:white; cursor:pointer; margin-bottom:15px;" onclick="openProfile()">
+            <div style="display:flex; align-items:center; gap:15px;">
+                <img id="myPfp" src="" style="width:50px; height:50px; border-radius:50%; border:2px solid white; object-fit: cover;">
+                <div style="flex:1">
+                    <h3 id="myNameDisplay">User</h3>
+                    <small id="myIdDisplay">ID: --</small>
+                </div>
+                <div style="position:relative;" onclick="event.stopPropagation(); openMailbox()">
+                    <span>📩</span>
+                    <span id="mailCount" class="badge hidden">0</span>
+                </div>
             </div>
         </div>
         <div style="display:flex; gap:10px; margin-bottom:15px;">
-            <button onclick="createGroup()" class="btn btn-primary" style="margin: 0;">+ New Group</button>
+            <button class="btn" onclick="openAddFriend()" style="flex:1; padding:10px; background:var(--primary); color:white;">+ Add Friend</button>
+            <button class="btn" onclick="createGroup()" style="flex:1; padding:10px; background:#eee;">+ Group</button>
         </div>
-        <div id="contactList" style="overflow-y:auto; flex:1;"></div>
+        <div id="contactList" style="flex:1; overflow-y:auto;"></div>
     </aside>
 
     <main id="chatAreaView" class="glass chat-area hidden">
-        <div id="activeChat" style="height:100%; display:flex; flex-direction:column;">
-            <div style="padding:20px; border-bottom:1px solid rgba(0,0,0,0.05); background: white;">
-                <h3 id="targetName">Select a Chat</h3>
+        <div id="noChat" style="margin:auto; text-align:center; opacity:0.3;">
+            <h1 style="font-size:4rem;">🏀</h1>
+            <p>Select a contact to start balling.</p>
+        </div>
+        <div id="activeChat" class="hidden" style="height:100%; display:flex; flex-direction:column;">
+            <div style="padding:20px; border-bottom:1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 id="targetName">Chat</h2>
+                    <small id="targetStatus" style="color:var(--gray);">Offline</small>
+                </div>
             </div>
-            <div id="msgBox" class="chat-box"></div>
-            <div class="input-group">
-                <input type="text" id="msgIn" placeholder="Write a message..." style="flex:1; padding:15px; border-radius:15px; background: #f8f9fa;">
-                <button onclick="sendMsg()" class="btn btn-primary" style="width: auto; padding: 0 25px; margin: 0;">Send</button>
+            <div class="chat-box" id="msgBox"></div>
+            <div id="emojiPanel" class="hidden"></div>
+            <div style="padding: 15px; display: flex; gap: 10px; align-items: center; border-top: 1px solid rgba(0,0,0,0.05);">
+                <button class="btn" style="background:none; font-size:1.5rem;" onclick="toggleEmojis()">😊</button>
+                <input type="text" id="msgIn" placeholder="Type message..." style="flex:1; padding:12px; border-radius:20px;" onkeypress="if(event.key==='Enter')sendMsg()">
+                <button class="btn" onclick="sendMsg()" style="background:var(--primary); color:white; padding:10px 20px; border-radius:20px;">Send</button>
             </div>
         </div>
     </main>
 </div>
 
-<div id="profileModal" class="modal-overlay hidden">
-    <div class="modal-card glass">
-        <h3>My Profile</h3>
-        <img id="editPfpPreview" style="width:100px; height:100px; border-radius:50%; margin:20px auto; display: block; object-fit: cover; border: 3px solid var(--primary);">
-        <input type="text" id="editPfpUrl" placeholder="Image URL" style="width:100%; padding:12px; margin-bottom:10px; border-radius:10px;">
-        <input type="text" id="editName" placeholder="Display Name" style="width:100%; padding:12px; margin-bottom:10px; border-radius:10px;">
-        <textarea id="editBio" placeholder="Tell us about yourself..." style="width:100%; padding:12px; margin-bottom:20px; border-radius:10px; height: 80px;"></textarea>
-        <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
-        <button class="btn btn-ghost" onclick="closeModal('profileModal')">Cancel</button>
-        <button class="btn btn-ghost" style="margin-top:15px; color:var(--error); border: 1px solid var(--error);" onclick="logout()">Logout</button>
+<div id="mailModal" class="modal-overlay hidden">
+    <div class="glass" style="width:400px; max-height:80vh; background:var(--white); border-radius:30px; overflow: hidden; display: flex; flex-direction: column;">
+        <div style="padding: 20px; background: var(--primary); color: white;">
+            <h3>Mailbox</h3>
+        </div>
+        <div id="mailList" style="flex:1; overflow-y:auto;"></div>
+        <button class="btn" style="margin: 15px; padding: 12px;" onclick="closeModal('mailModal')">Close</button>
     </div>
 </div>
 
-<div id="userInfoModal" class="modal-overlay hidden">
-    <div class="modal-card glass">
-        <img id="viewPfp" style="width:100px; height:100px; border-radius:50%; margin-bottom:15px; object-fit: cover;">
-        <h2 id="viewName">Name</h2>
-        <p id="viewBio" style="opacity:0.6; margin: 10px 0;"></p>
-        <p id="viewPhone" style="font-weight:bold; color: var(--primary); margin-bottom: 20px;"></p>
-        <button id="addFriendBtn" class="btn btn-primary" onclick="addFriendFromView()">Add to Contacts</button>
-        <button class="btn btn-ghost" onclick="closeModal('userInfoModal')">Close</button>
+<div id="profileModal" class="modal-overlay hidden">
+    <div class="glass" style="width:400px; padding:30px; background:var(--white); border-radius:30px; text-align:center;">
+        <h3>My Profile</h3>
+        <img id="editPfpPreview" src="" style="width:100px; height:100px; border-radius:50%; margin:20px auto; display:block; object-fit: cover; border: 3px solid var(--primary);">
+        <input type="text" id="editNameIn" placeholder="Display Name" style="width:100%; padding:12px; border-radius:12px; margin-bottom:10px;">
+        <p style="font-size:0.8rem; margin:10px 0; opacity: 0.6;">Avatar Style:</p>
+        <div class="avatar-grid" id="avatarPicker" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-bottom:20px;"></div>
+        <button class="btn" style="width:100%; padding:12px; background:var(--primary); color:white;" onclick="saveProfile()">Save Changes</button>
+        <button class="btn" style="width:100%; padding:12px; margin-top:10px;" onclick="toggleTheme()">🌓 Toggle Theme</button>
+        <button class="btn" style="width:100%; padding:12px; margin-top:10px; background:var(--error); color:white;" onclick="logout()">Logout</button>
+        <button class="btn" style="width:100%; margin-top:10px; background:none; color:var(--gray);" onclick="closeModal('profileModal')">Cancel</button>
     </div>
 </div>
 
@@ -130,228 +155,281 @@
     const SB_KEY = "sb_publishable_tW5cED71cJC5tZtXla5D-g_wv4NfVwo";
     const sb = supabase.createClient(SB_URL, SB_KEY);
 
-    // Initial structure to prevent "undefined" errors
-    let db = { users: {}, chats: {}, invites: {} };
+    let db = { users: {}, chats: {}, mailbox: {} };
     let currUser = JSON.parse(localStorage.getItem('balling_session'));
     let activeId = null;
-    let viewingUser = null;
 
-    window.onload = async () => {
-        try {
-            await loadDB();
-            document.getElementById('splash').classList.add('hidden');
-            if(!currUser) {
-                document.getElementById('authView').classList.remove('hidden');
-            } else {
-                document.getElementById('sidebarView').classList.remove('hidden');
-                document.getElementById('chatAreaView').classList.remove('hidden');
-                // Poll for updates every 3 seconds
-                setInterval(loadDB, 3000);
-            }
-        } catch(e) { 
-            console.error(e);
-            document.getElementById('loadStatus').innerText = "Database Error. Refresh."; 
-        }
+    window.onload = () => {
+        const savedTheme = localStorage.getItem('balling_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        buildEmojis();
+        buildAvatarPicker();
+        
+        setTimeout(() => {
+            document.getElementById('splash').style.opacity = '0';
+            setTimeout(() => document.getElementById('splash').classList.add('hidden'), 800);
+            if(!currUser) document.getElementById('authView').classList.remove('hidden');
+            else initApp();
+        }, 2000);
     };
 
+    function initApp() {
+        document.getElementById('sidebarView').classList.remove('hidden');
+        document.getElementById('chatAreaView').classList.remove('hidden');
+        loadDB();
+        setInterval(loadDB, 2000); 
+        setInterval(updateHeartbeat, 5000);
+    }
+
     async function loadDB() {
-        const { data, error } = await sb.from('balling_data').select('content').eq('id', 'main_db').single();
-        if(data && data.content) {
-            // Ensure all keys exist
-            db = {
-                users: data.content.users || {},
-                chats: data.content.chats || {},
-                invites: data.content.invites || {}
-            };
+        const { data } = await sb.from('balling_data').select('content').eq('id', 'main_db').single();
+        if(data) {
+            db = data.content;
+            if(!db.mailbox) db.mailbox = {};
+            const me = db.users[currUser.id];
+            document.getElementById('myNameDisplay').innerText = me.user;
+            document.getElementById('myIdDisplay').innerText = "ID: " + currUser.id;
+            document.getElementById('myPfp').src = me.pfp;
             
-            if(currUser && db.users[currUser.id]) {
-                const me = db.users[currUser.id];
-                document.getElementById('myNameDisplay').innerText = me.user;
-                document.getElementById('myPfp').src = me.pfp || 'https://api.dicebear.com/7.x/initials/svg?seed=' + me.user;
-                renderContacts();
-                if(activeId) renderMessages();
+            updateMailBadge();
+            renderContacts();
+            if(activeId) {
+                markAsSeen(activeId);
+                renderMessages();
             }
         }
     }
 
-    async function saveDB() { 
-        await sb.from('balling_data').upsert({ id: 'main_db', content: db }); 
+    async function saveDB() { await sb.from('balling_data').upsert({ id: 'main_db', content: db }); }
+
+    function updateHeartbeat() {
+        if(currUser && db.users[currUser.id]) {
+            db.users[currUser.id].lastSeen = Date.now();
+            saveDB();
+        }
     }
 
-    async function handleAuth(type) {
+    // AUTH
+    async function handleAuth() {
         const u = document.getElementById('userIn').value.trim();
-        const ph = document.getElementById('phoneIn').value.trim();
         const p = document.getElementById('passIn').value.trim();
+        if(!u || !p) return;
         
-        if(!u || !ph || !p) return alert("Please fill all fields");
-
-        if(type === 'signup') {
-            if(db.users[ph]) return alert("Phone number already registered!");
-            db.users[ph] = { 
-                user: u, 
-                pass: p, 
-                pfp: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + u, 
-                bio: 'New Baller here!', 
-                friends: {}, 
-                groups: [] 
-            };
-            currUser = { id: ph, name: u };
-        } else {
-            if(!db.users[ph] || db.users[ph].pass !== p) return alert("Invalid credentials");
-            currUser = { id: ph, name: db.users[ph].user };
+        await loadDB();
+        let id = Object.keys(db.users).find(k => db.users[k].user.toLowerCase() === u.toLowerCase() && db.users[k].pass === p);
+        
+        if(!id) {
+            // Check if user exists but wrong password
+            const userExists = Object.keys(db.users).find(k => db.users[k].user.toLowerCase() === u.toLowerCase());
+            if(userExists) {
+                document.getElementById('authErr').innerText = "Wrong password for this user!";
+                return;
+            }
+            // Register
+            id = `B-${Math.floor(1000 + Math.random()*9000)}`;
+            db.users[id] = { user: u, pass: p, friends: {}, groups: [], pfp: `https://api.dicebear.com/7.x/avataaars/svg?seed=${u}`, lastSeen: Date.now() };
+            await saveDB();
         }
-
+        
+        currUser = { id, name: u };
         localStorage.setItem('balling_session', JSON.stringify(currUser));
-        await saveDB();
         location.reload();
     }
 
+    // CONTACTS & STATUS
     function renderContacts() {
-        let html = "";
         const me = db.users[currUser.id];
-        
-        // Render Groups
-        if(me.groups) {
-            me.groups.forEach(gid => {
-                if(db.chats[gid]) {
-                    html += `<div class="contact-item ${activeId === gid ? 'active' : ''}" onclick="openChat('${gid}')">
-                        <div style="width:35px; height:35px; background:#ddd; border-radius:50%; display:flex; align-items:center; justify-content:center;">👥</div>
-                        ${db.chats[gid].name}
-                    </div>`;
-                }
-            });
-        }
+        const list = document.getElementById('contactList');
+        let html = "";
 
-        // Render Friends
-        if(me.friends) {
-            Object.keys(me.friends).forEach(fid => {
-                if(db.users[fid]) {
-                    html += `<div class="contact-item ${activeId === fid ? 'active' : ''}" onclick="openChat('${fid}')">
-                        <img src="${db.users[fid].pfp}" style="width:35px; height:35px; border-radius:50%; object-fit:cover;">
-                        ${db.users[fid].user}
-                    </div>`;
-                }
-            });
+        // Groups
+        (me.groups || []).forEach(gid => {
+            html += `
+                <div class="contact-item ${activeId === gid ? 'active' : ''}" onclick="openChat('${gid}')">
+                    <div style="width:40px; height:40px; border-radius:50%; background:#eee; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">👥</div>
+                    <strong style="flex:1">${gid.split('-')[0]}</strong>
+                </div>`;
+        });
+
+        // Friends
+        for(let fid in (me.friends || {})) {
+            const user = db.users[fid];
+            const isOnline = user && (Date.now() - user.lastSeen < 15000);
+            html += `
+                <div class="contact-item ${activeId === fid ? 'active' : ''}" onclick="openChat('${fid}')">
+                    <img src="${user.pfp}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+                    <div class="status-dot ${isOnline ? 'online' : 'offline'}"></div>
+                    <strong style="flex:1">${user.user}</strong>
+                </div>`;
         }
-        document.getElementById('contactList').innerHTML = html || "<p style='text-align:center; opacity:0.5; margin-top:20px;'>No contacts yet. <br>Click a name in a chat to add them!</p>";
+        list.innerHTML = html;
     }
 
+    // MAILBOX SYSTEM
+    function openMailbox() {
+        const list = document.getElementById('mailList');
+        const requests = db.mailbox[currUser.id] || [];
+        if(requests.length === 0) {
+            list.innerHTML = `<p style="padding:20px; text-align:center; opacity:0.5;">Mailbox empty</p>`;
+        } else {
+            list.innerHTML = requests.map((req, i) => `
+                <div class="mail-item">
+                    <div><strong>${req.fromName}</strong> wants to connect</div>
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn" style="background:var(--success); color:white; padding:5px 10px;" onclick="acceptFriend('${req.fromId}', ${i})">Accept</button>
+                        <button class="btn" style="background:var(--error); color:white; padding:5px 10px;" onclick="declineFriend(${i})">X</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        document.getElementById('mailModal').classList.remove('hidden');
+    }
+
+    function updateMailBadge() {
+        const count = (db.mailbox[currUser.id] || []).length;
+        const badge = document.getElementById('mailCount');
+        badge.innerText = count;
+        count > 0 ? badge.classList.remove('hidden') : badge.classList.add('hidden');
+    }
+
+    async function openAddFriend() {
+        const targetId = prompt("Enter the ID of the baller you want to add (e.g., B-1234):");
+        if(targetId && db.users[targetId]) {
+            if(targetId === currUser.id) return alert("You can't add yourself!");
+            if(!db.mailbox[targetId]) db.mailbox[targetId] = [];
+            
+            // Prevent duplicate requests
+            if(db.mailbox[targetId].find(r => r.fromId === currUser.id)) return alert("Request already sent!");
+            
+            db.mailbox[targetId].push({ fromId: currUser.id, fromName: currUser.name });
+            await saveDB();
+            alert("Request sent to " + db.users[targetId].user);
+        } else if(targetId) alert("User not found!");
+    }
+
+    async function acceptFriend(fid, index) {
+        db.users[currUser.id].friends[fid] = true;
+        db.users[fid].friends[currUser.id] = true;
+        db.mailbox[currUser.id].splice(index, 1);
+        await saveDB();
+        openMailbox();
+    }
+
+    async function declineFriend(index) {
+        db.mailbox[currUser.id].splice(index, 1);
+        await saveDB();
+        openMailbox();
+    }
+
+    // CHAT ENGINE
     function openChat(id) {
         activeId = id;
-        if(id.startsWith('GRP')) {
-            document.getElementById('targetName').innerText = db.chats[id].name;
+        document.getElementById('noChat').classList.add('hidden');
+        document.getElementById('activeChat').classList.remove('hidden');
+        
+        if(id.includes('GRP')) {
+            document.getElementById('targetName').innerText = id.split('-')[0];
+            document.getElementById('targetStatus').innerText = "Group Chat";
         } else {
             document.getElementById('targetName').innerText = db.users[id].user;
         }
+        
         renderMessages();
-        renderContacts();
     }
 
     async function sendMsg() {
-        const t = document.getElementById('msgIn').value.trim();
-        if(!t || !activeId) return;
-
-        const msg = { 
-            s: currUser.id, 
-            u: db.users[currUser.id].user, 
-            t: t, 
-            d: Date.now() 
-        };
-
-        if(activeId.startsWith('GRP')) {
-            if(!db.chats[activeId].messages) db.chats[activeId].messages = [];
-            db.chats[activeId].messages.push(msg);
-        } else {
-            const key = [currUser.id, activeId].sort().join('_');
-            if(!db.chats[key]) db.chats[key] = { messages: [] };
-            db.chats[key].messages.push(msg);
-        }
-
-        document.getElementById('msgIn').value = "";
+        const input = document.getElementById('msgIn');
+        if(!input.value.trim()) return;
+        if(!db.chats[activeId]) db.chats[activeId] = [];
+        db.chats[activeId].push({
+            s: currUser.id,
+            u: db.users[currUser.id].user,
+            t: input.value,
+            d: Date.now(),
+            seen: false
+        });
+        input.value = "";
+        document.getElementById('emojiPanel').classList.add('hidden');
         await saveDB();
         renderMessages();
     }
 
     function renderMessages() {
-        const key = activeId.startsWith('GRP') ? activeId : [currUser.id, activeId].sort().join('_');
-        const msgs = db.chats[key]?.messages || [];
-        
+        const msgs = db.chats[activeId] || [];
         document.getElementById('msgBox').innerHTML = msgs.map(m => `
-            <div class="bubble ${m.s === currUser.id ? 'me' : 'them'}" onclick="viewUserProfile('${m.s}')">
-                <div style="font-size: 10px; opacity: 0.7; margin-bottom: 2px;">${m.u}</div>
-                ${m.t}
-                <div style="font-size: 8px; opacity: 0.5; text-align: right; margin-top: 4px;">${new Date(m.d).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+            <div class="bubble ${m.s === currUser.id ? 'me' : 'them'}">
+                <small style="opacity:0.6; display:block; font-size:0.7rem;">${m.u}</small>
+                <div>${m.t}</div>
+                ${m.s === currUser.id ? `<span class="seen-tick">${m.seen ? '✓✓' : '✓'}</span>` : ''}
             </div>
         `).join('');
-        
         const box = document.getElementById('msgBox');
         box.scrollTop = box.scrollHeight;
     }
 
-    function viewUserProfile(id) {
-        viewingUser = id;
-        const u = db.users[id];
-        document.getElementById('viewPfp').src = u.pfp;
-        document.getElementById('viewName').innerText = u.user;
-        document.getElementById('viewBio').innerText = u.bio || "No bio yet.";
-        document.getElementById('viewPhone').innerText = "@" + id;
-        
-        // Hide add button if it's me or already a friend
-        const isFriend = db.users[currUser.id].friends && db.users[currUser.id].friends[id];
-        document.getElementById('addFriendBtn').style.display = (id === currUser.id || isFriend) ? 'none' : 'block';
-        
-        document.getElementById('userInfoModal').classList.remove('hidden');
+    function markAsSeen(chatId) {
+        if(db.chats[chatId]) {
+            db.chats[chatId].forEach(m => { if(m.s !== currUser.id) m.seen = true; });
+        }
     }
 
-    async function addFriendFromView() {
-        if(!db.users[currUser.id].friends) db.users[currUser.id].friends = {};
-        if(!db.users[viewingUser].friends) db.users[viewingUser].friends = {};
+    // EMOJIS (200+)
+    function buildEmojis() {
+        const panel = document.getElementById('emojiPanel');
+        let emojis = [];
+        // Face emojis
+        for(let i=128512; i<128567; i++) emojis.push(String.fromCodePoint(i));
+        // Hearts & Symbols
+        for(let i=128147; i<128170; i++) emojis.push(String.fromCodePoint(i));
+        // Sports & Food
+        for(let i=127920; i<128000; i++) emojis.push(String.fromCodePoint(i));
+        // Nature
+        for(let i=127744; i<127850; i++) emojis.push(String.fromCodePoint(i));
 
-        db.users[currUser.id].friends[viewingUser] = true;
-        db.users[viewingUser].friends[currUser.id] = true;
-        
-        await saveDB();
-        alert("Added to contacts!");
-        closeModal('userInfoModal');
-        renderContacts();
+        panel.innerHTML = emojis.map(e => `<div class="emoji-item" onclick="addEmoji('${e}')">${e}</div>`).join('');
     }
+    function toggleEmojis() { document.getElementById('emojiPanel').classList.toggle('hidden'); }
+    function addEmoji(e) { document.getElementById('msgIn').value += e; }
 
+    // PROFILE
     function openProfile() {
         const me = db.users[currUser.id];
         document.getElementById('editPfpPreview').src = me.pfp;
-        document.getElementById('editPfpUrl').value = me.pfp;
-        document.getElementById('editName').value = me.user;
-        document.getElementById('editBio').value = me.bio || "";
+        document.getElementById('editNameIn').value = me.user;
         document.getElementById('profileModal').classList.remove('hidden');
     }
 
     async function saveProfile() {
-        db.users[currUser.id].pfp = document.getElementById('editPfpUrl').value;
-        db.users[currUser.id].user = document.getElementById('editName').value;
-        db.users[currUser.id].bio = document.getElementById('editBio').value;
+        db.users[currUser.id].user = document.getElementById('editNameIn').value;
+        db.users[currUser.id].pfp = document.getElementById('editPfpPreview').src;
         await saveDB();
-        location.reload();
+        closeModal('profileModal');
     }
+
+    function buildAvatarPicker() {
+        const styles = ['avataaars', 'bottts', 'pixel-art', 'fun-emoji'];
+        const container = document.getElementById('avatarPicker');
+        container.innerHTML = styles.map(s => `<img src="https://api.dicebear.com/7.x/${s}/svg?seed=${Math.random()}" style="width:100%; border-radius:10px; cursor:pointer;" onclick="selectAvatar(this.src)">`).join('');
+    }
+    function selectAvatar(url) { document.getElementById('editPfpPreview').src = url; }
 
     async function createGroup() {
-        const name = prompt("Enter Group Name:");
-        if(!name) return;
-        
-        const gid = "GRP-" + Date.now();
-        db.chats[gid] = { 
-            name: name, 
-            owner: currUser.id, 
-            members: [currUser.id], 
-            messages: [{s: 'SYSTEM', u: 'Balling', t: `Group "${name}" created!`, d: Date.now()}] 
-        };
-        
-        if(!db.users[currUser.id].groups) db.users[currUser.id].groups = [];
-        db.users[currUser.id].groups.push(gid);
-        
-        await saveDB();
-        openChat(gid);
+        const name = prompt("Name your Group:");
+        if(name) {
+            const gid = name.replace(/\s/g, '') + "-" + Date.now();
+            if(!db.users[currUser.id].groups) db.users[currUser.id].groups = [];
+            db.users[currUser.id].groups.push(gid);
+            db.chats[gid] = [{ s: 'SYSTEM', u: 'Balling', t: `Welcome to the ${name} court!`, d: Date.now() }];
+            await saveDB();
+            openChat(gid);
+        }
     }
 
+    function toggleTheme() {
+        const t = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+        localStorage.setItem('balling_theme', t);
+    }
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
     function logout() { localStorage.clear(); location.reload(); }
 </script>
