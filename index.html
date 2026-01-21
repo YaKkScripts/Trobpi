@@ -37,32 +37,39 @@
         /* FaceTime UI */
         .call-overlay { position: fixed; inset: 0; background: #000; z-index: 8000; display: flex; flex-direction: column; }
         .video-grid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px; }
-        .video-wrapper { position: relative; background: #222; border-radius: 20px; overflow: hidden; }
-        video { width: 100%; height: 100%; object-fit: cover; background: #222; }
-        .call-controls { height: 120px; display: flex; justify-content: center; align-items: center; gap: 20px; background: rgba(0,0,0,0.8); }
-
-        #incomingCall { position: fixed; bottom: 20px; left: 20px; width: 280px; padding: 20px; z-index: 9999; background: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); transform: translateX(-120%); transition: 0.5s; border: 2px solid var(--primary); }
+        .video-wrapper { position: relative; background: #222; border-radius: 20px; overflow: hidden; border: 1px solid #444; }
+        video { width: 100%; height: 100%; object-fit: cover; background: #111; }
+        .video-label { position: absolute; bottom: 15px; left: 15px; background: rgba(0,0,0,0.6); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; }
+        .call-controls { height: 120px; display: flex; justify-content: center; align-items: center; gap: 20px; background: rgba(0,0,0,0.9); }
+        
+        #incomingCall { position: fixed; bottom: 20px; left: 20px; width: 300px; padding: 20px; z-index: 9999; background: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); border: 2px solid var(--primary); transform: translateX(-150%); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #incomingCall.active { transform: translateX(0); }
     </style>
 </head>
 <body>
 
 <div id="incomingCall">
-    <h4>Incoming Call</h4>
-    <p><strong id="callerName">...</strong> is calling</p>
-    <div style="display:flex; gap:10px; margin-top:10px;">
-        <button class="btn btn-main" style="flex:1; padding:10px; background:var(--success); color:white; border:none; border-radius:10px;" onclick="answerCall()">Accept</button>
-        <button class="btn btn-danger" style="flex:1; padding:10px; background:var(--error); color:white; border:none; border-radius:10px;" onclick="declineCall()">Decline</button>
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
+        <div style="width:40px; height:40px; background:var(--primary); border-radius:50%;"></div>
+        <div>
+            <h4 id="callerName">Incoming...</h4>
+            <small>FaceTime Video</small>
+        </div>
+    </div>
+    <div style="display:flex; gap:10px;">
+        <button class="btn btn-main" style="flex:1" onclick="answerCall()">Accept</button>
+        <button class="btn btn-danger" style="flex:1" onclick="declineCall()">Decline</button>
     </div>
 </div>
 
-<div class="container">
+<div class="container" id="mainCont">
     <div id="authView">
         <div class="glass" style="max-width: 400px; margin: 80px auto; padding: 40px; text-align: center;">
             <h1 style="color: var(--primary); margin-bottom: 20px;">Balling.com</h1>
-            <input type="text" id="userIn" placeholder="Username" style="width: 100%; padding:10px; margin-bottom: 10px; border-radius:10px; border:1px solid #ddd;">
-            <input type="password" id="passIn" placeholder="Password" style="width: 100%; padding:10px; margin-bottom: 10px; border-radius:10px; border:1px solid #ddd;">
-            <button class="btn btn-main" style="width:100%; padding:10px; background:var(--primary); color:white; border:none; border-radius:10px;" onclick="handleAuth()">Enter Cloud</button>
+            <input type="text" id="userIn" placeholder="Username" style="width: 100%; margin-bottom: 10px; padding: 10px; border-radius: 10px; border: 1px solid #ddd;">
+            <input type="password" id="passIn" placeholder="Password" style="width: 100%; margin-bottom: 10px; padding: 10px; border-radius: 10px; border: 1px solid #ddd;">
+            <button class="btn btn-main" id="authBtn" style="width: 100%;" onclick="handleAuth()">Create Account</button>
+            <p style="margin-top: 15px;"><a href="javascript:void(0)" onclick="toggleAuth()">Already have an account? Login</a></p>
         </div>
     </div>
 
@@ -71,23 +78,33 @@
             <div class="user-card">
                 <h3 id="myName">User</h3>
                 <small id="myId">ID</small>
+                <button class="btn" style="width:100%; background:rgba(255,255,255,0.2); color:white; margin-top:10px;" onclick="logout()">Logout</button>
             </div>
+            <button class="btn btn-main" onclick="setNav('add')">+ Add Friend</button>
             <div class="contact-list" id="contactList"></div>
-            <input type="text" id="friendIdIn" placeholder="Enter Friend ID" style="padding:10px; border-radius:10px; border:1px solid #ddd; margin-top:10px;">
-            <button onclick="addFriend()" style="margin-top:5px; padding:5px;">Add Friend</button>
         </aside>
 
-        <main class="main-view glass" style="display:flex; flex-direction:column;">
-            <div id="chatView" class="hidden" style="flex:1; display:flex; flex-direction:column;">
-                <div style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+        <main class="main-view glass" style="position:relative; overflow:hidden; display:flex; flex-direction:column;">
+            <div id="chatDefault" style="text-align:center; margin-top:25%; color:var(--gray);">
+                <h2>Balling Cloud</h2><p>Select a friend to call or text</p>
+            </div>
+
+            <div id="chatView" class="hidden" style="height:100%; display:flex; flex-direction:column;">
+                <div style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
                     <h3 id="targetName">Friend</h3>
-                    <button onclick="startFaceTime()" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:10px;">📞 FaceTime</button>
+                    <button class="btn btn-main" onclick="startFaceTime()">📞 FaceTime</button>
                 </div>
                 <div class="chat-box" id="msgBox"></div>
-                <div class="input-area" style="padding:10px; display:flex; gap:10px;">
-                    <input type="text" id="msgIn" style="flex:1; padding:10px; border-radius:20px; border:1px solid #ddd;">
-                    <button onclick="sendMsg()" style="padding:10px 20px;">Send</button>
+                <div class="input-area">
+                    <input type="text" id="msgIn" placeholder="Type a message..." onkeypress="if(event.key==='Enter')sendMsg()">
+                    <button class="btn btn-main" onclick="sendMsg()">Send</button>
                 </div>
+            </div>
+
+            <div id="addView" class="hidden" style="padding:40px;">
+                <h2>Add New Friend</h2>
+                <input type="text" id="friendIdIn" placeholder="(000) 000-000" style="width:100%; margin-top:20px; padding:12px;">
+                <button class="btn btn-main" style="width:100%; margin-top:10px;" onclick="addFriend()">Connect ID</button>
             </div>
         </main>
     </div>
@@ -95,11 +112,19 @@
 
 <div id="callOverlay" class="hidden call-overlay">
     <div class="video-grid">
-        <div class="video-wrapper"><video id="localVideo" autoplay playsinline muted></video></div>
-        <div class="video-wrapper"><video id="remoteVideo" autoplay playsinline></video></div>
+        <div class="video-wrapper">
+            <video id="localVideo" autoplay playsinline muted></video>
+            <div class="video-label">You (Camera On)</div>
+        </div>
+        <div class="video-wrapper">
+            <video id="remoteVideo" autoplay playsinline></video>
+            <div class="video-label" id="remoteLabel">Waiting for connection...</div>
+        </div>
     </div>
     <div class="call-controls">
-        <button onclick="endCall()" style="width:70px; height:70px; border-radius:50%; background:red; color:white; border:none; font-size:24px;">✖</button>
+        <button class="btn btn-main" onclick="toggleMic()" id="micBtn">Mute Mic</button>
+        <button class="btn btn-main" onclick="toggleCam()" id="camBtn">Stop Video</button>
+        <button class="btn btn-danger" style="border-radius:50%; width:70px; height:70px; font-size:24px;" onclick="endCall()">✖</button>
     </div>
 </div>
 
@@ -112,9 +137,7 @@
     let currUser = JSON.parse(localStorage.getItem('balling_session'));
     let activeId = null;
     let localStream = null;
-    let pc = null; // PeerConnection
-
-    const rtcConfig = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+    let isLogin = false;
 
     async function loadDB() {
         const { data } = await sb.from('balling_data').select('content').eq('id', 'main_db').single();
@@ -123,66 +146,83 @@
             if(currUser) {
                 db.users[currUser.id].seen = Date.now();
                 renderContacts();
+                if(activeId) renderMessages();
                 checkCallingSignals();
             }
         }
     }
     async function saveDB() { await sb.from('balling_data').upsert({ id: 'main_db', content: db }); }
 
-    // --- FACETIME CALLING LOGIC ---
-    
-    async function startFaceTime() {
-        activeId = activeId; // Ensure we have a target
-        document.getElementById('callOverlay').classList.remove('hidden');
-        
-        localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
-        document.getElementById('localVideo').srcObject = localStream;
+    // --- AUTH (Condensed) ---
+    function toggleAuth() { isLogin = !isLogin; document.getElementById('authBtn').innerText = isLogin ? "Login" : "Create Account"; }
+    async function handleAuth() {
+        const u = document.getElementById('userIn').value.trim();
+        const p = document.getElementById('passIn').value.trim();
+        await loadDB();
+        if(!isLogin) {
+            const id = `(${Math.floor(Math.random()*899)+100}) ${Math.floor(Math.random()*899)+100}-${Math.floor(Math.random()*899)+100}`;
+            db.users[id] = { user: u, pass: p, friends: {}, blocks: [], seen: Date.now() };
+            await saveDB(); login(id);
+        } else {
+            const id = Object.keys(db.users).find(k => db.users[k].user === u && db.users[k].pass === p);
+            if(id) login(id); else alert("Invalid Login");
+        }
+    }
+    function login(id) { currUser = { id, name: db.users[id].user }; localStorage.setItem('balling_session', JSON.stringify(currUser)); location.reload(); }
+    function logout() { localStorage.removeItem('balling_session'); location.reload(); }
 
-        // Signal to the other user that we are calling
-        db.calls[activeId] = { 
-            from: currUser.id, 
-            name: currUser.name, 
-            status: 'ringing',
-            timestamp: Date.now() 
-        };
-        await saveDB();
+    // --- FACETIME LOGIC ---
+    async function startFaceTime() {
+        try {
+            activeId = activeId; // Ensure we are calling the selected friend
+            localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
+            document.getElementById('localVideo').srcObject = localStream;
+            document.getElementById('callOverlay').classList.remove('hidden');
+            
+            // Set call status in DB
+            db.calls[activeId] = { from: currUser.id, name: currUser.name, type: 'ringing', timestamp: Date.now() };
+            await saveDB();
+        } catch (e) { alert("Please enable camera/mic permissions."); }
     }
 
-    async function checkCallingSignals() {
+    function checkCallingSignals() {
         const myCall = db.calls[currUser.id];
         
         // 1. Someone is calling ME
-        if (myCall && myCall.status === 'ringing' && !localStream) {
+        if(myCall && myCall.type === 'ringing' && (Date.now() - myCall.timestamp < 30000)) {
             document.getElementById('callerName').innerText = myCall.name;
             document.getElementById('incomingCall').classList.add('active');
+        } 
+        
+        // 2. I am calling someone and they ACCEPTED
+        if (activeId && db.calls[activeId] && db.calls[activeId].type === 'connected') {
+            document.getElementById('remoteLabel').innerText = "Connected to " + db.users[activeId].user;
+            // In a real app, WebRTC PeerConnection would happen here. 
+            // For this simulation, we show a 'Connected' state.
+            document.getElementById('remoteVideo').style.background = "#333"; 
         }
 
-        // 2. The person I called accepted
-        if (activeId && db.calls[activeId] && db.calls[activeId].status === 'accepted') {
-            // Logic for establishing peer-to-peer would go here
-            // For this lightweight version, we just show the screens are active
-            document.getElementById('remoteVideo').style.background = "#444"; 
-        }
-
-        // 3. Call Ended
-        if (myCall && myCall.status === 'ended') {
-            closeCallUI();
+        // 3. Call was ended or declined
+        if (myCall && myCall.type === 'ended') {
+            endCall();
         }
     }
 
     async function answerCall() {
-        const callData = db.calls[currUser.id];
-        activeId = callData.from; // Set target to the caller
+        const myCall = db.calls[currUser.id];
+        activeId = myCall.from;
         
         document.getElementById('incomingCall').classList.remove('active');
         document.getElementById('callOverlay').classList.remove('hidden');
-
-        localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
-        document.getElementById('localVideo').srcObject = localStream;
-
-        // Update call status to accepted
-        db.calls[currUser.id].status = 'accepted';
-        await saveDB();
+        
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
+            document.getElementById('localVideo').srcObject = localStream;
+            
+            // Update DB to tell caller we connected
+            db.calls[currUser.id].type = 'connected';
+            await saveDB();
+        } catch (e) { alert("Camera error."); }
     }
 
     async function declineCall() {
@@ -191,66 +231,63 @@
         await saveDB();
     }
 
-    async function endCall() {
-        if(localStream) localStream.getTracks().forEach(t => t.stop());
-        localStream = null;
-        
-        // Notify other user
-        if(activeId) {
-            db.calls[activeId] = { status: 'ended' };
+    function endCall() {
+        if(localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+            localStream = null;
         }
-        delete db.calls[currUser.id];
-        
-        await saveDB();
-        closeCallUI();
-    }
-
-    function closeCallUI() {
         document.getElementById('callOverlay').classList.add('hidden');
-        document.getElementById('localVideo').srcObject = null;
-        document.getElementById('remoteVideo').srcObject = null;
+        if (activeId) {
+            db.calls[activeId] = { type: 'ended' };
+            db.calls[currUser.id] = { type: 'ended' };
+        }
+        saveDB();
     }
 
-    // --- AUTH & UI ---
-    async function handleAuth() {
-        const u = document.getElementById('userIn').value.trim();
-        const p = document.getElementById('passIn').value.trim();
-        await loadDB();
-        let id = Object.keys(db.users).find(k => db.users[k].user === u);
-        if(!id) {
-            id = `ID-${Math.floor(Math.random()*9000)}`;
-            db.users[id] = { user: u, pass: p, friends: {}, seen: Date.now() };
-        }
-        currUser = { id, name: u };
-        localStorage.setItem('balling_session', JSON.stringify(currUser));
-        await saveDB();
-        location.reload();
+    function toggleMic() {
+        const audio = localStream.getAudioTracks()[0];
+        audio.enabled = !audio.enabled;
+        document.getElementById('micBtn').innerText = audio.enabled ? "Mute Mic" : "Unmute Mic";
+    }
+
+    function toggleCam() {
+        const video = localStream.getVideoTracks()[0];
+        video.enabled = !video.enabled;
+        document.getElementById('camBtn').innerText = video.enabled ? "Stop Video" : "Start Video";
+    }
+
+    // --- MESSAGING & CONTACTS (Same as your logic) ---
+    function openChat(id) {
+        activeId = id;
+        document.getElementById('chatDefault').classList.add('hidden');
+        document.getElementById('chatView').classList.remove('hidden');
+        document.getElementById('addView').classList.add('hidden');
+        document.getElementById('targetName').innerText = db.users[id].user;
+        renderMessages();
     }
 
     function renderContacts() {
         const container = document.getElementById('contactList');
         const friends = db.users[currUser.id].friends || {};
         container.innerHTML = Object.keys(friends).map(fid => `
-            <div class="nav-item" onclick="openChat('${fid}')">
-                <strong>${friends[fid]}</strong>
-                <div class="status-dot ${(Date.now() - (db.users[fid]?.seen || 0) < 10000) ? 'online' : ''}"></div>
+            <div class="nav-item ${activeId === fid ? 'active' : ''}" onclick="openChat('${fid}')">
+                <div><strong>${friends[fid]}</strong><br><small>${fid}</small></div>
+                <div class="status-dot ${(Date.now() - db.users[fid].seen < 10000) ? 'online' : ''}"></div>
             </div>
         `).join('');
-    }
-
-    function openChat(id) {
-        activeId = id;
-        document.getElementById('chatView').classList.remove('hidden');
-        document.getElementById('targetName').innerText = db.users[id].user;
     }
 
     async function addFriend() {
         const id = document.getElementById('friendIdIn').value.trim();
         if(db.users[id]) {
             db.users[currUser.id].friends[id] = db.users[id].user;
-            await saveDB();
-            loadDB();
-        } else { alert("User not found"); }
+            await saveDB(); location.reload();
+        } else { alert("ID not found"); }
+    }
+
+    function setNav(v) { 
+        document.getElementById('chatView').classList.add('hidden'); 
+        document.getElementById('addView').classList.remove('hidden'); 
     }
 
     if(currUser) {
@@ -258,7 +295,7 @@
         document.getElementById('appView').classList.remove('hidden');
         document.getElementById('myName').innerText = currUser.name;
         document.getElementById('myId').innerText = currUser.id;
-        setInterval(loadDB, 3000);
+        setInterval(loadDB, 2000);
     }
 </script>
 </body>
