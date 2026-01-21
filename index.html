@@ -35,17 +35,16 @@
         .btn { padding: 10px 20px; border-radius: 25px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; }
         .btn-main { background: var(--primary); color: white; }
         .btn-danger { background: #ff5252; color: white; }
-
-        /* Calling Toast */
-        #callToast { position: fixed; bottom: 20px; left: 20px; width: 300px; padding: 20px; z-index: 4000; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-left: 5px solid var(--primary); }
         
-        /* Video Call Layout */
+        /* Calling UI */
         .call-overlay { position: fixed; inset: 0; background: #000; z-index: 3000; display: flex; flex-direction: column; }
         .video-grid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px; }
         .video-wrapper { position: relative; background: #222; border-radius: 20px; overflow: hidden; }
         video { width: 100%; height: 100%; object-fit: cover; }
         .video-label { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.5); color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; }
-        .call-controls { height: 100px; display: flex; justify-content: center; align-items: center; gap: 20px; background: rgba(255,255,255,0.1); }
+        
+        #incomingCallPop { position: fixed; bottom: 20px; left: 20px; width: 280px; z-index: 4000; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-left: 5px solid var(--primary); animation: slideUp 0.5s ease; }
+        @keyframes slideUp { from { transform: translateY(100px); } to { transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -57,10 +56,11 @@
             <input type="text" id="userIn" placeholder="Username" style="width: 100%; margin-bottom: 10px;">
             <input type="password" id="passIn" placeholder="Password" style="width: 100%; margin-bottom: 10px;">
             <div id="signupMsg" class="hidden" style="background: #e0f7fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-                <small>Universal ID:</small><br><strong id="newIdDisplay" style="color: var(--primary-dark);"></strong>
+                <small>Your Universal ID:</small><br>
+                <strong id="newIdDisplay" style="color: var(--primary-dark);"></strong>
             </div>
             <button class="btn btn-main" id="authBtn" style="width: 100%;" onclick="handleAuth()">Create Account</button>
-            <p style="margin-top: 15px;"><a href="javascript:void(0)" onclick="toggleAuth()" id="toggleLink">Login instead</a></p>
+            <p style="margin-top: 15px;"><a href="javascript:void(0)" onclick="toggleAuth()" id="toggleLink">Login</a></p>
         </div>
     </div>
 
@@ -69,17 +69,15 @@
             <div class="user-card">
                 <h3 id="myName">User</h3>
                 <small id="myId">ID</small>
-                <div style="display:flex; gap:5px; margin-top:10px;">
-                    <button class="btn" style="flex:1; font-size:0.7rem; background:rgba(255,255,255,0.2); color:white;" onclick="logout()">Logout</button>
-                </div>
+                <button class="btn" style="width:100%; margin-top:10px; background:rgba(255,255,255,0.2); color:white;" onclick="logout()">Logout</button>
             </div>
             <button class="btn btn-main" onclick="setNav('add')">+ Add Friend</button>
             <div class="contact-list" id="contactList"></div>
         </aside>
 
-        <main class="main-view glass" style="position:relative; overflow:hidden;">
+        <main class="main-view glass" style="position:relative;">
             <div id="chatDefault" style="text-align:center; margin-top:25%; color:var(--gray);">
-                <h2>Welcome Back</h2><p>Select a contact to start balling.</p>
+                <h2>Select a Baller</h2>
             </div>
 
             <div id="chatView" class="hidden" style="height:100%; display:flex; flex-direction:column;">
@@ -92,7 +90,7 @@
                 </div>
                 <div class="chat-box" id="msgBox"></div>
                 <div class="input-area">
-                    <input type="text" id="msgIn" placeholder="Message, Link, or Media URL..." onkeypress="if(event.key==='Enter')sendMsg()">
+                    <input type="text" id="msgIn" placeholder="Message, Link or Image URL..." onkeypress="if(event.key==='Enter')sendMsg()">
                     <button class="btn btn-main" onclick="sendMsg()">Send</button>
                 </div>
             </div>
@@ -106,18 +104,24 @@
     </div>
 </div>
 
-<div id="callToast" class="hidden">
-    <p id="callerInfo" style="margin-bottom:10px; font-weight:bold;">User is Calling!</p>
-    <div style="display:flex; gap:10px;">
-        <button class="btn btn-main" style="flex:1" onclick="acceptCall()">Accept</button>
+<div id="incomingCallPop" class="hidden">
+    <p><strong id="callerNameDisplay">User</strong> is Calling!</p>
+    <div style="display:flex; gap:10px; margin-top:15px;">
+        <button class="btn btn-main" style="flex:1" onclick="answerCall()">Accept</button>
         <button class="btn btn-danger" style="flex:1" onclick="declineCall()">Decline</button>
     </div>
 </div>
 
 <div id="callOverlay" class="hidden call-overlay">
     <div class="video-grid">
-        <div class="video-wrapper"><video id="localVideo" autoplay playsinline muted></video><div class="video-label">You</div></div>
-        <div class="video-wrapper"><video id="remoteVideo" autoplay playsinline></video><div class="video-label" id="remoteLabel">Friend</div></div>
+        <div class="video-wrapper">
+            <video id="localVideo" autoplay playsinline muted></video>
+            <div class="video-label">You</div>
+        </div>
+        <div class="video-wrapper">
+            <video id="remoteVideo" autoplay playsinline></video>
+            <div class="video-label" id="remoteLabel">Remote User</div>
+        </div>
     </div>
     <div class="call-controls">
         <button class="btn btn-main" id="micBtn" onclick="toggleMic()">Mic: ON</button>
@@ -134,24 +138,31 @@
     let db = { users: {}, chats: {}, calls: {} };
     let currUser = JSON.parse(localStorage.getItem('balling_session'));
     let activeId = null;
+    let isLogin = false;
     let localStream = null;
-    let lastMsgCount = {};
+    let lastMsgCount = 0;
 
-    // --- NOTIFICATIONS ---
-    if (Notification.permission !== "granted") Notification.requestPermission();
+    // --- UTILS ---
+    function formatMsg(t) {
+        const imgRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))/i;
+        const vidRegex = /(https?:\/\/.*\.(?:mp4|webm))/i;
+        const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?(.+)/g;
 
-    function sendNotify(user, text) {
-        if (Notification.permission === "granted") {
-            new Notification("Balling Cloud", { body: `${user} said: ${text}`, icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png' });
-        }
+        if(imgRegex.test(t)) return t.replace(imgRegex, '<img src="$1">');
+        if(vidRegex.test(t)) return t.replace(vidRegex, '<video src="$1" controls></video>');
+        if(ytRegex.test(t)) return t.replace(ytRegex, '<iframe width="100%" height="200" src="https://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>');
+        return t;
     }
 
     // --- AUTH ---
-    let isLogin = false;
-    function toggleAuth() { isLogin = !isLogin; document.getElementById('authBtn').innerText = isLogin ? "Login" : "Create Account"; }
+    function toggleAuth() {
+        isLogin = !isLogin;
+        document.getElementById('authBtn').innerText = isLogin ? "Login" : "Create Account";
+    }
 
     async function handleAuth() {
-        const u = document.getElementById('userIn').value.trim(), p = document.getElementById('passIn').value.trim();
+        const u = document.getElementById('userIn').value.trim();
+        const p = document.getElementById('passIn').value.trim();
         await loadDB();
         if(!isLogin) {
             const id = `(${Math.floor(Math.random()*899)+100}) ${Math.floor(Math.random()*899)+100}-${Math.floor(Math.random()*899)+100}`;
@@ -166,7 +177,11 @@
         }
     }
 
-    function login(id) { currUser = { id, name: db.users[id].user }; localStorage.setItem('balling_session', JSON.stringify(currUser)); location.reload(); }
+    function login(id) {
+        currUser = { id, name: db.users[id].user };
+        localStorage.setItem('balling_session', JSON.stringify(currUser));
+        location.reload();
+    }
     function logout() { localStorage.removeItem('balling_session'); location.reload(); }
 
     // --- CORE DATA ---
@@ -178,38 +193,14 @@
                 db.users[currUser.id].seen = Date.now();
                 renderContacts();
                 if(activeId) renderMessages();
-                checkCalls();
-                checkNewMessages();
+                checkCallingSystem();
+                checkNotifications();
             }
         }
     }
     async function saveDB() { await sb.from('balling_data').upsert({ id: 'main_db', content: db }); }
 
-    function checkNewMessages() {
-        Object.keys(db.chats).forEach(chan => {
-            if(chan.includes(currUser.id)) {
-                const msgs = db.chats[chan];
-                if(!lastMsgCount[chan]) lastMsgCount[chan] = msgs.length;
-                if(msgs.length > lastMsgCount[chan]) {
-                    const last = msgs[msgs.length-1];
-                    if(last.s !== currUser.id) sendNotify(db.users[last.s].user, last.t);
-                    lastMsgCount[chan] = msgs.length;
-                }
-            }
-        });
-    }
-
-    // --- MESSAGING & MEDIA ---
-    function formatMsg(text) {
-        const urlRegex = /(https?:\/\/[^\s]+)/g;
-        return text.replace(urlRegex, (url) => {
-            if (url.match(/\.(jpeg|jpg|gif|png)$/) != null) return `<img src="${url}" />`;
-            if (url.match(/\.(mp4|webm)$/) != null) return `<video controls src="${url}"></video>`;
-            if (url.includes('youtube.com')) return `<iframe width="100%" src="https://www.youtube.com/embed/${url.split('v=')[1]}" frameborder="0" allowfullscreen></iframe>`;
-            return `<a href="${url}" target="_blank" style="color:cyan">${url}</a>`;
-        });
-    }
-
+    // --- MESSAGING ---
     async function sendMsg() {
         const input = document.getElementById('msgIn');
         if(!input.value.trim() || !activeId) return;
@@ -224,61 +215,124 @@
     function renderMessages() {
         const chan = [currUser.id, activeId].sort().join('_');
         const msgs = db.chats[chan] || [];
-        document.getElementById('msgBox').innerHTML = msgs.map(m => `<div class="bubble ${m.s === currUser.id ? 'me' : 'them'}">${formatMsg(m.t)}</div>`).join('');
-        document.getElementById('msgBox').scrollTop = document.getElementById('msgBox').scrollHeight;
+        const myBlocks = db.users[currUser.id].blocks || [];
+        
+        document.getElementById('msgBox').innerHTML = msgs
+            .filter(m => !myBlocks.includes(m.s))
+            .map(m => `<div class="bubble ${m.s === currUser.id ? 'me' : 'them'}">${formatMsg(m.t)}</div>`).join('');
+        document.getElementById('msgBox').scrollTop = 999999;
     }
 
-    // --- CONTACTS & BLOCK ---
-    function renderContacts() {
-        const container = document.getElementById('contactList');
-        const friends = db.users[currUser.id].friends || {};
-        const blocks = db.users[currUser.id].blocks || [];
-        container.innerHTML = Object.keys(friends).filter(id => !blocks.includes(id)).map(fid => {
-            const isOnline = (Date.now() - (db.users[fid]?.seen || 0)) < 10000;
-            return `<div class="nav-item ${activeId === fid ? 'active' : ''}" onclick="openChat('${fid}')">
-                <div><strong>${friends[fid]}</strong><br><small>${fid}</small></div>
-                <div class="status-dot ${isOnline ? 'online' : ''}"></div>
-            </div>`;
-        }).join('');
-    }
-
-    function openChat(id) { activeId = id; setNav('chat'); document.getElementById('chatView').classList.remove('hidden'); document.getElementById('targetName').innerText = db.users[id].user; renderMessages(); }
-    async function blockUser() { if(confirm("Block this user?")) { db.users[currUser.id].blocks.push(activeId); await saveDB(); location.reload(); } }
-    function setNav(v) { document.getElementById('chatDefault').classList.add('hidden'); document.getElementById('addView').classList.toggle('hidden', v!=='add'); }
-    async function addFriend() { const id = document.getElementById('friendIdIn').value.trim(); if(db.users[id]) { db.users[currUser.id].friends[id] = db.users[id].user; await saveDB(); alert("Connected!"); setNav(''); } }
-
-    // --- CALLING ---
-    async function initiateCall() {
-        document.getElementById('callOverlay').classList.remove('hidden');
-        localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
-        document.getElementById('localVideo').srcObject = localStream;
-        db.calls[activeId] = { from: currUser.id, name: currUser.name, active: true };
-        await saveDB();
-    }
-
-    function checkCalls() {
-        const call = db.calls[currUser.id];
-        if(call && call.active) {
-            document.getElementById('callerInfo').innerText = `${call.name} Is Calling!`;
-            document.getElementById('callToast').classList.remove('hidden');
+    function checkNotifications() {
+        if (!activeId) return;
+        const chan = [currUser.id, activeId].sort().join('_');
+        const msgs = db.chats[chan] || [];
+        if(msgs.length > lastMsgCount) {
+            const last = msgs[msgs.length-1];
+            if(last.s !== currUser.id && Notification.permission === "granted") {
+                new Notification(`Balling: ${db.users[last.s].user}`, { body: last.t });
+            }
+            lastMsgCount = msgs.length;
         }
     }
 
-    async function acceptCall() {
-        document.getElementById('callToast').classList.add('hidden');
+    // --- CALLING ---
+    async function initiateCall() {
+        db.calls[activeId] = { from: currUser.id, name: currUser.name, status: 'ringing' };
+        await saveDB();
+        startStream();
         document.getElementById('callOverlay').classList.remove('hidden');
-        localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
-        document.getElementById('localVideo').srcObject = localStream;
+    }
+
+    function checkCallingSystem() {
+        const call = db.calls[currUser.id];
+        const myBlocks = db.users[currUser.id].blocks || [];
+        
+        if(call && call.status === 'ringing' && !myBlocks.includes(call.from)) {
+            document.getElementById('callerNameDisplay').innerText = call.name;
+            document.getElementById('incomingCallPop').classList.remove('hidden');
+        } else if (call && call.status === 'ended') {
+            endCall();
+        }
+    }
+
+    async function answerCall() {
+        const call = db.calls[currUser.id];
+        db.calls[currUser.id].status = 'connected';
+        await saveDB();
+        document.getElementById('incomingCallPop').classList.add('hidden');
+        document.getElementById('callOverlay').classList.remove('hidden');
+        startStream();
+    }
+
+    async function declineCall() {
         delete db.calls[currUser.id];
+        await saveDB();
+        document.getElementById('incomingCallPop').classList.add('hidden');
+    }
+
+    async function startStream() {
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
+            document.getElementById('localVideo').srcObject = localStream;
+        } catch(e) { alert("Camera Error"); }
+    }
+
+    function endCall() {
+        if(localStream) localStream.getTracks().forEach(t => t.stop());
+        document.getElementById('callOverlay').classList.add('hidden');
+        if(activeId) db.calls[activeId] = { status: 'ended' };
         saveDB();
     }
 
-    function declineCall() { document.getElementById('callToast').classList.add('hidden'); delete db.calls[currUser.id]; saveDB(); }
-    function endCall() { if(localStream) localStream.getTracks().forEach(t => t.stop()); document.getElementById('callOverlay').classList.add('hidden'); }
-    function toggleMic() { const a = localStream.getAudioTracks()[0]; a.enabled = !a.enabled; document.getElementById('micBtn').innerText = `Mic: ${a.enabled?'ON':'OFF'}`; }
-    function toggleCam() { const v = localStream.getVideoTracks()[0]; v.enabled = !v.enabled; document.getElementById('camBtn').innerText = `Cam: ${v.enabled?'ON':'OFF'}`; }
+    // --- SOCIAL ---
+    function blockUser() {
+        if(!confirm("Block this user?")) return;
+        db.users[currUser.id].blocks.push(activeId);
+        saveDB();
+        setNav('add');
+    }
 
-    if(currUser) { document.getElementById('authView').classList.add('hidden'); document.getElementById('appView').classList.remove('hidden'); document.getElementById('myName').innerText = currUser.name; document.getElementById('myId').innerText = currUser.id; }
+    function addFriend() {
+        const id = document.getElementById('friendIdIn').value.trim();
+        if(db.users[id]) {
+            db.users[currUser.id].friends[id] = db.users[id].user;
+            saveDB();
+            setNav('');
+        }
+    }
+
+    function renderContacts() {
+        const friends = db.users[currUser.id].friends || {};
+        document.getElementById('contactList').innerHTML = Object.keys(friends).map(fid => `
+            <div class="nav-item ${activeId === fid ? 'active' : ''}" onclick="openChat('${fid}')">
+                <div><strong>${friends[fid]}</strong><br><small>${fid}</small></div>
+                <div class="status-dot ${(Date.now() - db.users[fid].seen) < 10000 ? 'online' : ''}"></div>
+            </div>
+        `).join('');
+    }
+
+    function openChat(id) {
+        activeId = id;
+        document.getElementById('chatDefault').classList.add('hidden');
+        document.getElementById('chatView').classList.remove('hidden');
+        document.getElementById('targetName').innerText = db.users[id].user;
+        renderMessages();
+    }
+
+    function setNav(v) {
+        document.getElementById('chatView').classList.add('hidden');
+        document.getElementById('addView').classList.toggle('hidden', v !== 'add');
+    }
+
+    // --- BOOT ---
+    if(currUser) {
+        document.getElementById('authView').classList.add('hidden');
+        document.getElementById('appView').classList.remove('hidden');
+        document.getElementById('myName').innerText = currUser.name;
+        document.getElementById('myId').innerText = currUser.id;
+        Notification.requestPermission();
+    }
     setInterval(loadDB, 3000);
 </script>
 </body>
