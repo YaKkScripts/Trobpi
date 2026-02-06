@@ -18,7 +18,7 @@
         .app-shell { display: flex; width: 100vw; height: 100vh; padding: 15px; gap: 15px; }
         .panel { background: var(--white); border-radius: 25px; border: 2px solid var(--border); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,229,255,0.1); }
         
-        .sidebar { width: 340px; flex-shrink: 0; }
+        .sidebar { width: 340px; flex-shrink: 0; position: relative; }
         .profile-btn { 
             padding: 25px; 
             background: linear-gradient(135deg, var(--white), #f0feff);
@@ -52,12 +52,15 @@
         input:focus { border-color: var(--cyan); }
         
         #splash { position: fixed; inset: 0; background: white; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .startup-tag { margin-top: 20px; font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; }
+        .sidebar-footer { padding: 10px; text-align: center; font-size: 10px; color: #cbd5e1; border-top: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
 <div id="splash">
     <h1 style="color: var(--cyan); font-size: 40px; letter-spacing: 10px;">CONNECT</h1>
+    <p class="startup-tag">From Carter Ligons</p>
 </div>
 
 <div class="app-shell">
@@ -78,6 +81,10 @@
         </div>
 
         <div class="list-box" id="sidebarList"></div>
+        
+        <div class="sidebar-footer">
+            From Carter Ligons
+        </div>
     </aside>
 
     <main class="panel main-view">
@@ -134,7 +141,10 @@
 
     window.onload = async () => {
         await sync();
-        document.getElementById('splash').style.display = 'none';
+        // Added a slight delay so the "From Carter Ligons" is visible
+        setTimeout(() => {
+            document.getElementById('splash').style.display = 'none';
+        }, 1200);
         
         if(session && db.users && db.users[session.id]) {
             startApp();
@@ -148,7 +158,6 @@
             const { data, error } = await sb.from('balling_data').select('content').eq('id', 'main_db').single();
             if(data && data.content) {
                 db = data.content;
-                // Ensure base structure exists
                 if(!db.users) db.users = {};
                 if(!db.chats) db.chats = {};
             }
@@ -158,8 +167,8 @@
     async function save() {
         const { error } = await sb.from('balling_data').update({ content: db }).eq('id', 'main_db');
         if (error) {
-            console.error("CRITICAL: Save failed. Check Supabase RLS policies.", error);
-            alert("Error saving to database. Are RLS policies disabled?");
+            console.error("CRITICAL: Save failed.", error);
+            alert("Error saving to database.");
         }
     }
 
@@ -238,7 +247,6 @@
         if(!input.value.trim()) return;
         if(!db.chats[activeId]) db.chats[activeId] = [];
         db.chats[activeId].push({ s: session.id, u: db.users[session.id].user, t: input.value, d: Date.now() });
-        const val = input.value;
         input.value = "";
         await save();
         drawMsgs();
